@@ -1,0 +1,31 @@
+{
+  "name": "motter-budget-app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Daniel Motter budgeting app — website + shared API monorepo (Christian debt-free stewardship framing)",
+  "workspaces": [
+    "apps/web",
+    "apps/api",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,web -c red,cyan \"npm run dev -w @motter/api\" \"npm run dev -w @motter/web\"",
+    "dev:web": "npm run dev -w @motter/web",
+    "dev:api": "npm run dev -w @motter/api",
+    "build": "npm run build -w @motter/shared && npm run build -w @motter/api-client && npm run build -w @motter/api && npm run build -w @motter/web",
+    "lint": "npm run lint -w @motter/web --if-present && npm run lint -w @motter/api --if-present",
+    "typecheck": "npm run build -w @motter/shared && npm run build -w @motter/api-client && npm run typecheck -w @motter/api && npm run typecheck -w @motter/web",
+    "test": "npm run test -w @motter/api",
+    "clean": "rm -rf apps/*/dist apps/*/.next packages/*/dist node_modules apps/*/node_modules packages/*/node_modules"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "typescript": "^5.9.3"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  }
+}

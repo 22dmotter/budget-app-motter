@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Env / secrets — never commit real values
+.env
+.env.*
+!.env.example
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+.turbo/
+*.tsbuildinfo
+
+# Test / coverage
+coverage/
+.nyc_output/
+
+# Logs & OS
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Misc
+.vercel/
+.cache/
+tmp/
+temp/
+
+# GitHub Actions: push requires token workflow scope; see docs/ci.workflow.example.yml
+.github/
