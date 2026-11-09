@@ -6,6 +6,18 @@ Monorepo for Daniel Motter’s planned **Christian debt-free budgeting** product
 
 Brand tone matches the public channel site (dark theme, red accent, Romans 13:8 framing). The static marketing site remains separate: [daniel-motter-site](https://github.com/22dmotter/daniel-motter-site).
 
+## Why this exists
+
+This project grew out of a personal journey. Daniel Motter is working to pay off about $49k of debt, and he's documenting every step on his YouTube channel, [@DanielEMotter](https://www.youtube.com/@DanielEMotter), along with the real numbers on [his website](https://22dmotter.github.io/daniel-motter-site/).
+
+Two verses shape the heart behind it:
+
+> "The rich rules over the poor, and the borrower is the slave of the lender." (Proverbs 22:7, ESV)
+
+> "Owe no one anything, except to love each other, for the one who loves another has fulfilled the law." (Romans 13:8, ESV)
+
+Debt can quietly take away our freedom, our peace, and our ability to give generously. The goal of this app is simple: help people see where their money goes, make a plan to get free, and steward what they've been given well, so there's more room to love their families and neighbors. It's built as a small ministry, with honesty, grace, and practical tools over pressure or guilt. Wherever you're starting from, you're welcome here.
+
 ## Architecture
 
 ```mermaid
@@ -131,4 +143,4 @@ It is not installed under `.github/workflows/` in this initial push because the 
 
 ## License / disclaimer
 
-Private repository. Not financial advice. Scripture quotations for framing only.
+Released under the [MIT License](LICENSE). Not financial advice. Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), copyright © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved.

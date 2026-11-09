@@ -2,6 +2,7 @@
   "name": "budget-app-motter",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "description": "Daniel Motter budgeting app — website + shared API monorepo (Christian debt-free stewardship framing)",
   "workspaces": [
     "apps/web",
