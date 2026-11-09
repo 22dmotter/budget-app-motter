@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "license": "MIT",
-  "description": "Daniel Motter budgeting app — website + shared API monorepo (Christian debt-free stewardship framing)",
+  "description": "Daniel Motter budgeting app \u2014 website + shared API monorepo (Christian debt-free stewardship framing)",
   "workspaces": [
     "apps/web",
     "apps/api",
@@ -17,13 +17,16 @@
     "lint": "npm run lint -w @motter/web --if-present && npm run lint -w @motter/api --if-present",
     "typecheck": "npm run build -w @motter/shared && npm run build -w @motter/api-client && npm run typecheck -w @motter/api && npm run typecheck -w @motter/web",
     "test": "npm run test -w @motter/api",
-    "clean": "rm -rf apps/*/dist apps/*/.next packages/*/dist node_modules apps/*/node_modules packages/*/node_modules"
+    "clean": "rm -rf apps/*/dist apps/*/.next packages/*/dist node_modules apps/*/node_modules packages/*/node_modules",
+    "build:pages": "npm run build -w @motter/shared && npm run build -w @motter/api-client && PAGES_BASE_PATH=/budget-app-motter NEXT_PUBLIC_API_URL= npm run build -w @motter/web",
+    "deploy:pages": "npm run build:pages && touch apps/web/out/.nojekyll && gh-pages -d apps/web/out -b gh-pages --dotfiles"
   },
   "engines": {
     "node": ">=20.19.0"
   },
   "devDependencies": {
     "concurrently": "^9.1.2",
+    "gh-pages": "^6.3.0",
     "typescript": "^5.9.3"
   },
   "allowScripts": {

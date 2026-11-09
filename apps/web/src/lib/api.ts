@@ -1,9 +1,12 @@
 import { createApiClient } from "@motter/api-client";
 
-/** Browser / server typed client pointing at the shared Motter API */
+/**
+ * Browser / server typed client pointing at the shared Motter API.
+ * Returns null when NEXT_PUBLIC_API_URL is unset so static Pages builds
+ * and offline previews degrade gracefully instead of calling localhost.
+ */
 export function getApiClient() {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ||
-    "http://localhost:4000";
-  return createApiClient({ baseUrl });
+  const raw = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
+  if (!raw) return null;
+  return createApiClient({ baseUrl: raw });
 }

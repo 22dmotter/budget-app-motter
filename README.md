@@ -2,9 +2,21 @@
 
 Monorepo for Daniel Motter’s planned **Christian debt-free budgeting** product: a Next.js website and a shared backend API that a future mobile app can also call.
 
-> **Status:** infrastructure / scaffolding only. No real accounts, database, payments, or deployment yet. Placeholder copy is marked clearly — no fake prices, launch dates, testimonials, or stats.
+> **Status:** infrastructure / scaffolding only. No real accounts, database, or payments yet. A static marketing preview of the website is on GitHub Pages (API is not hosted). Placeholder copy is marked clearly — no fake prices, launch dates, testimonials, or stats.
 
 Brand tone matches the public channel site (dark theme, red accent, Romans 13:8 framing). The static marketing site remains separate: [daniel-motter-site](https://github.com/22dmotter/daniel-motter-site).
+
+## Live preview
+
+Static website (no API): **[https://22dmotter.github.io/budget-app-motter/](https://22dmotter.github.io/budget-app-motter/)**
+
+To rebuild and publish the site to the `gh-pages` branch:
+
+```bash
+npm run deploy:pages
+```
+
+That runs a Next.js static export with `PAGES_BASE_PATH=/budget-app-motter`, adds `.nojekyll`, and pushes `apps/web/out` to GitHub Pages. The Fastify API is **not** deployed with this preview.
 
 ## Why this exists
 
@@ -60,7 +72,7 @@ budget-app-motter/
 | `/about` | Project framing |
 | `/pricing` | Placeholder — **no prices** |
 | `/login`, `/signup` | Placeholder UI only — **no real auth** |
-| `/dashboard` | Placeholder; probes `GET /v1/health` via typed client |
+| `/dashboard` | Placeholder; client-side health probe (shows “not connected yet” without an API) |
 | `not-found` | 404 page |
 
 ### API routes (`apps/api`)
@@ -118,6 +130,8 @@ Env is validated with **zod** when the API starts.
 | `npm run typecheck` | TypeScript check across packages |
 | `npm test` | API vitest suite (includes health check) |
 | `npm run lint` | Lint where configured |
+| `npm run build:pages` | Static export of `apps/web` with GitHub Pages base path |
+| `npm run deploy:pages` | Build pages export and push to the `gh-pages` branch |
 
 ```bash
 npm run dev
@@ -137,7 +151,7 @@ It is not installed under `.github/workflows/` in this initial push because the 
 2. **Auth** — email/password or magic link; JWT/session; implement `/v1/auth/*`.
 3. **Stripe** — products/prices, Checkout, webhook signature verification on `/v1/payments/webhook`.
 4. **Lead capture** — persist `POST /v1/leads`; optional email provider.
-5. **Hosting** — e.g. Vercel (web) + Fly/Railway/Render (API) + managed Postgres.
+5. **Hosting** — static web preview is on GitHub Pages; later e.g. Vercel (web) + Fly/Railway/Render (API) + managed Postgres.
 6. **Mobile** — scaffold Expo under `apps/mobile` using `@motter/api-client`.
 7. **Content** — replace placeholder copy; keep honest about launch status.
 
