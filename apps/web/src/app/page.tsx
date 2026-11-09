@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { brand } from "@/config/brand";
 
 export default function HomePage() {
   return (
@@ -10,10 +11,10 @@ export default function HomePage() {
             Stewardship that honors <em>God</em> and frees you from debt.
           </h1>
           <p className="lead">
-            This site is scaffolding for a planned budgeting app built around
-            Christian debt-free living — clearer money habits, honest progress
-            tracking, and a path toward owing no one except the continuing debt
-            of love.{" "}
+            {brand.name} is scaffolding for a planned budgeting product built
+            around Christian debt-free living — clearer money habits, honest
+            progress tracking, and a path toward owing no one except the
+            continuing debt of love.{" "}
             <span className="ph">PLACEHOLDER COPY — not a live product</span>
           </p>
           <div className="cta-row">
@@ -52,7 +53,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section>
+      <section className="section-alt">
         <div className="wrap">
           <div className="sec-head">
             <span className="eyebrow">Planned ideas</span>

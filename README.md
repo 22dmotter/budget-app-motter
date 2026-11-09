@@ -4,7 +4,7 @@ Monorepo for Daniel Motter’s planned **Christian debt-free budgeting** product
 
 > **Status:** infrastructure / scaffolding only. No real accounts, database, or payments yet. A static marketing preview of the website is on GitHub Pages (API is not hosted). Placeholder copy is marked clearly — no fake prices, launch dates, testimonials, or stats.
 
-Brand tone matches the public channel site (dark theme, red accent, Romans 13:8 framing). The static marketing site remains separate: [daniel-motter-site](https://github.com/22dmotter/daniel-motter-site).
+The website UI uses a light fintech theme (navy + crimson accent) with Romans 13:8 / Proverbs 22:7 framing. The personal channel site remains separate: [daniel-motter-site](https://github.com/22dmotter/daniel-motter-site).
 
 ## Live preview
 
@@ -29,6 +29,14 @@ Two verses shape the heart behind it:
 > "Owe no one anything, except to love each other, for the one who loves another has fulfilled the law." (Romans 13:8, ESV)
 
 Debt can quietly take away our freedom, our peace, and our ability to give generously. The goal of this app is simple: help people see where their money goes, make a plan to get free, and steward what they've been given well, so there's more room to love their families and neighbors. It's built as a small ministry, with honesty, grace, and practical tools over pressure or guilt. Wherever you're starting from, you're welcome here.
+
+## Renaming the product brand
+
+The final product name is undecided. **UI brand copy lives in one place:**
+
+[`apps/web/src/config/brand.ts`](apps/web/src/config/brand.ts)
+
+Change `name`, `tagline`, `description`, and related fields there. The header logo, footer, page titles/metadata, and homepage copy import that config. Repo name, npm package names, and GitHub Pages URL stay as-is until you rename those separately. Founder story fields (`founder.*`) are for the About page only — not the product brand.
 
 ## Architecture
 

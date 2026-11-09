@@ -45,7 +45,7 @@ export default function SignupPage() {
           <p className="notice">
             <span className="ph">PLACEHOLDER</span> — POST /v1/auth/signup and
             POST /v1/leads return 501 until implemented.{" "}
-            <Link href="/login" style={{ color: "var(--accent)" }}>
+            <Link href="/login" className="text-link">
               Log in
             </Link>
           </p>

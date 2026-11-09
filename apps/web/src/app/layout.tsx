@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { brand } from "@/config/brand";
 import "@/styles/globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Motter Budget — Stewardship-focused budgeting (placeholder)",
-    template: "%s | Motter Budget",
+    default: `${brand.name} — ${brand.tagline}`,
+    template: `%s | ${brand.name}`,
   },
-  description:
-    "Placeholder website for a planned Christian debt-free budgeting app. Not launched. No accounts or billing yet.",
+  description: brand.description,
   robots: { index: false, follow: false },
 };
 
@@ -31,7 +31,7 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap"
           rel="stylesheet"
         />
-        <meta name="theme-color" content="#0b0d10" />
+        <meta name="theme-color" content="#0F1E3D" />
       </head>
       <body>
         <div className="page-shell">

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { brand } from "@/config/brand";
 
 export const metadata: Metadata = {
   title: "About",
@@ -14,17 +15,20 @@ export default function AboutPage() {
           Built around <em>stewardship</em>, not hype.
         </h1>
         <p className="lead">
-          Daniel Motter shares a Christian debt-free journey on YouTube (
+          {brand.name} is a planned budgeting product focused on Christian
+          debt-free living. It was started by {brand.founder.name}, who is
+          documenting his own journey to pay off debt on YouTube (
           <a
-            href="https://www.youtube.com/@DanielEMotter"
+            href={brand.founder.youtubeUrl}
             target="_blank"
             rel="noreferrer"
-            style={{ color: "var(--accent)" }}
+            className="text-link"
           >
-            @DanielEMotter
+            {brand.founder.youtubeHandle}
           </a>
-          ). This repository scaffolds a future budgeting product that can serve
-          both a website and a mobile client through one shared API.
+          ). That founder story is personal context — not the product brand.
+          This repository scaffolds a future app that can serve both a website
+          and a mobile client through one shared API.
         </p>
         <div className="cards two" style={{ marginTop: 32 }}>
           <article className="card">
