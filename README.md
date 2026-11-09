@@ -141,6 +141,16 @@ It is not installed under `.github/workflows/` in this initial push because the 
 6. **Mobile** — scaffold Expo under `apps/mobile` using `@motter/api-client`.
 7. **Content** — replace placeholder copy; keep honest about launch status.
 
+## Contributing
+
+This app is being built in the open, right alongside Daniel's own debt-payoff journey, and you're welcome to build it with us. If you share the mission of helping people get out of debt and steward their money well, there's a place for you here, whatever your experience level.
+
+- **Spot a bug or have a question?** [Open an issue](https://github.com/22dmotter/budget-app-motter/issues).
+- **Have an idea that would help someone get free of debt?** Suggest a feature in an issue and tell us the story behind it.
+- **Want to write code or improve the docs?** Fork the repo, make your change on a branch, run `npm run typecheck`, `npm run build`, and `npm test`, then open a pull request explaining what you changed and why.
+
+Please be kind and patient with one another. Money can be a tender subject, so every conversation here should leave people more hopeful than when they arrived. And never commit real keys, passwords, or anyone's personal financial data.
+
 ## License / disclaimer
 
 Released under the [MIT License](LICENSE). Not financial advice. Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), copyright © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved.
