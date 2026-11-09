@@ -37,3 +37,10 @@ temp/
 
 # GitHub Actions: push requires token workflow scope; see docs/ci.workflow.example.yml
 .github/
+
+# Local tooling
+.venv/
+.venv-xlsx/
+
+__pycache__/
+*.py[cod]

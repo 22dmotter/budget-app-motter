@@ -4,6 +4,7 @@ import { brand } from "@/config/brand";
 const links = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About" },
+  { href: "/downloads", label: "Downloads" },
   { href: "/pricing", label: "Pricing" },
   { href: "/dashboard", label: "Dashboard" },
 ];

@@ -15,6 +15,7 @@ export function SiteFooter() {
         <div className="links">
           <Link href="/">Home</Link>
           <Link href="/about">About</Link>
+          <Link href="/downloads">Downloads</Link>
           <Link href="/pricing">Pricing</Link>
           <Link href="/login">Log in</Link>
           <Link href="/signup">Sign up</Link>

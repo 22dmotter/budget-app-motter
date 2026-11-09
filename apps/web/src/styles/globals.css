@@ -395,11 +395,124 @@ blockquote cite {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  position: relative;
+  isolation: isolate;
 }
 
 main {
   flex: 1;
+  position: relative;
+  z-index: 1;
 }
+
+
+/* Soft drifting background — GPU-friendly, low opacity for WCAG text contrast */
+.motion-bg {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(15, 30, 61, 0.06), transparent 60%),
+    radial-gradient(900px 500px at 90% 0%, rgba(180, 35, 24, 0.05), transparent 55%),
+    var(--bg);
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(64px);
+  opacity: 0.45;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+}
+
+.blob-a {
+  width: 42vw;
+  height: 42vw;
+  max-width: 520px;
+  max-height: 520px;
+  left: -8%;
+  top: 8%;
+  background: rgba(15, 30, 61, 0.14);
+  animation: drift-a 28s ease-in-out infinite alternate;
+}
+
+.blob-b {
+  width: 36vw;
+  height: 36vw;
+  max-width: 440px;
+  max-height: 440px;
+  right: -6%;
+  top: 22%;
+  background: rgba(180, 35, 24, 0.10);
+  animation: drift-b 34s ease-in-out infinite alternate;
+}
+
+.blob-c {
+  width: 48vw;
+  height: 48vw;
+  max-width: 560px;
+  max-height: 560px;
+  left: 28%;
+  bottom: -12%;
+  background: rgba(15, 30, 61, 0.09);
+  animation: drift-c 40s ease-in-out infinite alternate;
+}
+
+@keyframes drift-a {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(6%, 10%, 0) scale(1.08); }
+}
+
+@keyframes drift-b {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(-8%, 6%, 0) scale(1.06); }
+}
+
+@keyframes drift-c {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(4%, -8%, 0) scale(1.1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blob {
+    animation: none !important;
+    opacity: 0.3;
+  }
+}
+
+.download-card h3 {
+  margin-bottom: 10px;
+}
+
+.download-meta {
+  margin-top: 10px;
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+
+.site-header,
+.site-footer,
+main .card,
+main .hero,
+main section {
+  position: relative;
+  z-index: 0;
+}
+
+/* Keep solid surfaces readable over the motion layer */
+.card,
+.form-card.card {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+}
+
+.section-alt {
+  background: rgba(238, 241, 246, 0.72);
+}
+
 
 ::selection {
   background: rgba(180, 35, 24, 0.18);

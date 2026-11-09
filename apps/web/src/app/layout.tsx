@@ -35,6 +35,11 @@ export default function RootLayout({
       </head>
       <body>
         <div className="page-shell">
+          <div className="motion-bg" aria-hidden="true">
+            <div className="blob blob-a" />
+            <div className="blob blob-b" />
+            <div className="blob blob-c" />
+          </div>
           <SiteHeader />
           <main>{children}</main>
           <SiteFooter />

@@ -30,6 +30,17 @@ Two verses shape the heart behind it:
 
 Debt can quietly take away our freedom, our peace, and our ability to give generously. The goal of this app is simple: help people see where their money goes, make a plan to get free, and steward what they've been given well, so there's more room to love their families and neighbors. It's built as a small ministry, with honesty, grace, and practical tools over pressure or guilt. Wherever you're starting from, you're welcome here.
 
+## Free spreadsheet downloads
+
+Static `.xlsx` templates live in [`apps/web/public/downloads/`](apps/web/public/downloads/) and are listed on `/downloads`. Regenerate them with:
+
+```bash
+python3 -m venv .venv-xlsx && .venv-xlsx/bin/pip install openpyxl
+.venv-xlsx/bin/python scripts/generate_budget_spreadsheets.py
+```
+
+Titles pull the product name from `apps/web/src/config/brand.ts` via `apps/web/src/config/downloads.ts`.
+
 ## Renaming the product brand
 
 The final product name is undecided. **UI brand copy lives in one place:**
@@ -81,6 +92,7 @@ budget-app-motter/
 | `/pricing` | Placeholder — **no prices** |
 | `/login`, `/signup` | Placeholder UI only — **no real auth** |
 | `/dashboard` | Placeholder; client-side health probe (shows “not connected yet” without an API) |
+| `/downloads` | Free budgeting spreadsheets (.xlsx) for Excel / Google Sheets / Numbers |
 | `not-found` | 404 page |
 
 ### API routes (`apps/api`)
