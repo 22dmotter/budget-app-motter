@@ -26,7 +26,7 @@ Both clients talk to the **same versioned API**. The website does **not** talk t
 ## Folder structure
 
 ```
-budget-app-modern/
+budget-app-motter/
 ├── apps/
 │   ├── web/          # Next.js App Router website
 │   ├── api/          # Fastify TypeScript API (/v1/*)
@@ -71,8 +71,8 @@ budget-app-modern/
 ## Local setup
 
 ```bash
-git clone https://github.com/22dmotter/budget-app-modern.git
-cd budget-app-modern
+git clone https://github.com/22dmotter/budget-app-motter.git
+cd budget-app-motter
 npm install
 
 # Copy env examples (placeholder values only — never commit real secrets)
