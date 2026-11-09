@@ -5,16 +5,25 @@ import { useEffect, useRef } from "react";
 type Particle = {
   x: number;
   y: number;
-  vx: number;
-  vy: number;
+  /** Base upward speed (negative y in canvas coords = up) */
+  speed: number;
+  /** Sway amplitude in px */
+  swayAmp: number;
+  /** Sway frequency */
+  swayFreq: number;
+  /** Phase offset for sine sway */
+  phase: number;
   r: number;
   crimson: boolean;
+  /** 0–1 life used for fade; advances with ascent */
+  life: number;
+  /** Larger bokeh orbs drift slower / stay fainter */
+  bokeh: boolean;
 };
 
 const NAVY = { r: 15, g: 30, b: 61 }; // #0F1E3D
 const CRIMSON = { r: 180, g: 35, b: 24 }; // #B42318
-const LINK_DIST = 120;
-const MOUSE_RADIUS = 140;
+const MOUSE_RADIUS = 130;
 
 function prefersReducedMotion(): boolean {
   if (typeof window === "undefined") return true;
@@ -24,13 +33,43 @@ function prefersReducedMotion(): boolean {
 function particleCount(width: number, height: number): number {
   const area = width * height;
   const isMobile = width < 768;
-  const target = Math.round(area / (isMobile ? 18000 : 14000));
-  return Math.max(12, Math.min(isMobile ? 30 : 70, target));
+  const target = Math.round(area / (isMobile ? 20000 : 16000));
+  return Math.max(14, Math.min(isMobile ? 30 : 70, target));
+}
+
+function spawnParticle(
+  width: number,
+  height: number,
+  fromBottom: boolean
+): Particle {
+  const bokeh = Math.random() < 0.12;
+  const crimson = !bokeh && Math.random() < 0.2;
+  const r = bokeh
+    ? 10 + Math.random() * 18
+    : 1.5 + Math.random() * 5.5;
+  // Bigger = slower (parallax)
+  const speed = bokeh
+    ? 0.12 + Math.random() * 0.18
+    : 0.35 + Math.random() * 0.55 + (7 - Math.min(r, 7)) * 0.04;
+  return {
+    x: Math.random() * width,
+    y: fromBottom
+      ? height + r + Math.random() * 40
+      : Math.random() * height,
+    speed,
+    swayAmp: bokeh ? 8 + Math.random() * 16 : 12 + Math.random() * 28,
+    swayFreq: 0.0004 + Math.random() * 0.0009,
+    phase: Math.random() * Math.PI * 2,
+    r,
+    crimson,
+    life: fromBottom ? 0 : Math.random(),
+    bokeh,
+  };
 }
 
 /**
- * Lightweight canvas particle field — navy dots with crimson accents,
- * faint links, gentle mouse influence. Fixed behind content.
+ * Soft rising particles with glow — navy + crimson accents, no network lines.
+ * Calm fintech backdrop layered over the CSS gradient blobs.
  */
 export function ParticleBackground() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -49,22 +88,18 @@ export function ParticleBackground() {
     let width = 0;
     let height = 0;
     let dpr = 1;
+    let t = 0;
     const mouse = { x: -9999, y: -9999, active: false };
     let resizeTimer: ReturnType<typeof setTimeout> | null = null;
+    const isCoarse =
+      typeof window !== "undefined" &&
+      window.matchMedia("(pointer: coarse)").matches;
 
     const makeParticles = () => {
       const count = particleCount(width, height);
-      particles = Array.from({ length: count }, () => {
-        const crimson = Math.random() < 0.18;
-        return {
-          x: Math.random() * width,
-          y: Math.random() * height,
-          vx: (Math.random() - 0.5) * 0.28,
-          vy: (Math.random() - 0.5) * 0.28,
-          r: crimson ? 1.4 + Math.random() * 1.2 : 1.1 + Math.random() * 1.4,
-          crimson,
-        };
-      });
+      particles = Array.from({ length: count }, () =>
+        spawnParticle(width, height, false)
+      );
     };
 
     const resize = () => {
@@ -77,9 +112,7 @@ export function ParticleBackground() {
       canvas.style.height = `${height}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       makeParticles();
-      if (reduced) {
-        drawFrame(false);
-      }
+      if (reduced) drawFrame(false);
     };
 
     const onResize = () => {
@@ -87,81 +120,76 @@ export function ParticleBackground() {
       resizeTimer = setTimeout(resize, 150);
     };
 
-    const drawFrame = (animate: boolean) => {
-      ctx.clearRect(0, 0, width, height);
+    const drawParticle = (p: Particle, alphaScale: number) => {
+      const c = p.crimson ? CRIMSON : NAVY;
+      // Fade in near bottom, fade out near top
+      const edge = Math.min(1, p.y / (height * 0.18), (height - p.y) / (height * 0.2));
+      const baseAlpha = p.bokeh
+        ? 0.04 + 0.04 * (1 - p.r / 30)
+        : p.crimson
+          ? 0.22
+          : 0.16;
+      const alpha = Math.max(0, baseAlpha * edge * alphaScale);
 
-      // Soft vignette wash so particles never fight text contrast
-      const wash = ctx.createLinearGradient(0, 0, 0, height);
-      wash.addColorStop(0, "rgba(247, 248, 250, 0.15)");
-      wash.addColorStop(1, "rgba(247, 248, 250, 0.35)");
-      ctx.fillStyle = wash;
-      ctx.fillRect(0, 0, width, height);
+      if (alpha < 0.01) return;
 
-      for (let i = 0; i < particles.length; i++) {
-        const p = particles[i];
-        if (animate) {
-          // Gentle mouse force (attract slightly when close, soft push at center)
-          if (mouse.active) {
-            const dx = p.x - mouse.x;
-            const dy = p.y - mouse.y;
-            const dist = Math.hypot(dx, dy) || 1;
-            if (dist < MOUSE_RADIUS) {
-              const force = (1 - dist / MOUSE_RADIUS) * 0.035;
-              // Mild repulsion near cursor, slight tangential drift
-              p.vx += (dx / dist) * force;
-              p.vy += (dy / dist) * force;
-            }
-          }
-
-          p.x += p.vx;
-          p.y += p.vy;
-
-          // Soft wrap
-          if (p.x < -20) p.x = width + 20;
-          if (p.x > width + 20) p.x = -20;
-          if (p.y < -20) p.y = height + 20;
-          if (p.y > height + 20) p.y = -20;
-
-          // Dampen so motion stays calm
-          p.vx *= 0.995;
-          p.vy *= 0.995;
-          // Keep a tiny baseline drift
-          p.vx += (Math.random() - 0.5) * 0.01;
-          p.vy += (Math.random() - 0.5) * 0.01;
-          const speed = Math.hypot(p.vx, p.vy);
-          if (speed > 0.55) {
-            p.vx *= 0.55 / speed;
-            p.vy *= 0.55 / speed;
-          }
-        }
-
-        const c = p.crimson ? CRIMSON : NAVY;
-        const alpha = p.crimson ? 0.28 : 0.22;
+      if (p.bokeh || p.r > 3.5 || p.crimson) {
+        const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * (p.bokeh ? 1.6 : 2.4));
+        glow.addColorStop(0, `rgba(${c.r},${c.g},${c.b},${alpha})`);
+        glow.addColorStop(0.45, `rgba(${c.r},${c.g},${c.b},${alpha * 0.45})`);
+        glow.addColorStop(1, `rgba(${c.r},${c.g},${c.b},0)`);
+        ctx.fillStyle = glow;
         ctx.beginPath();
-        ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},${alpha})`;
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, p.r * (p.bokeh ? 1.6 : 2.4), 0, Math.PI * 2);
         ctx.fill();
       }
 
-      // Faint connecting lines
-      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},${Math.min(0.35, alpha * (p.bokeh ? 0.7 : 1.35))})`;
+      ctx.arc(p.x, p.y, p.r * (p.bokeh ? 0.55 : 1), 0, Math.PI * 2);
+      ctx.fill();
+    };
+
+    const drawFrame = (animate: boolean) => {
+      ctx.clearRect(0, 0, width, height);
+
+      if (animate) t += 1;
+
       for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const a = particles[i];
-          const b = particles[j];
-          const dx = a.x - b.x;
-          const dy = a.y - b.y;
-          const dist = Math.hypot(dx, dy);
-          if (dist > LINK_DIST) continue;
-          const t = 1 - dist / LINK_DIST;
-          const accent = a.crimson || b.crimson;
-          const c = accent ? CRIMSON : NAVY;
-          ctx.strokeStyle = `rgba(${c.r},${c.g},${c.b},${0.08 + t * 0.1})`;
-          ctx.beginPath();
-          ctx.moveTo(a.x, a.y);
-          ctx.lineTo(b.x, b.y);
-          ctx.stroke();
+        const p = particles[i];
+
+        if (animate) {
+          const sway = Math.sin(t * p.swayFreq * 60 + p.phase) * p.swayAmp * 0.02;
+          let dx = sway;
+          let dy = -p.speed;
+
+          // Desktop-only gentle push away from cursor
+          if (mouse.active && !isCoarse) {
+            const mx = p.x - mouse.x;
+            const my = p.y - mouse.y;
+            const dist = Math.hypot(mx, my) || 1;
+            if (dist < MOUSE_RADIUS) {
+              const force = (1 - dist / MOUSE_RADIUS) * 0.45;
+              dx += (mx / dist) * force;
+              dy += (my / dist) * force * 0.35;
+            }
+          }
+
+          p.x += dx;
+          p.y += dy;
+
+          // Soft horizontal wrap
+          if (p.x < -30) p.x = width + 30;
+          if (p.x > width + 30) p.x = -30;
+
+          // Respawn at bottom when past the top
+          if (p.y < -p.r * 3) {
+            particles[i] = spawnParticle(width, height, true);
+            continue;
+          }
         }
+
+        drawParticle(p, 1);
       }
     };
 
@@ -182,6 +210,7 @@ export function ParticleBackground() {
     };
 
     const onMove = (e: MouseEvent) => {
+      if (isCoarse) return;
       mouse.x = e.clientX;
       mouse.y = e.clientY;
       mouse.active = true;
