@@ -115,7 +115,9 @@ npm run dev
 
 ## CI
 
-GitHub Actions (`.github/workflows/ci.yml`) runs on push/PR to `main`: install → typecheck → build → test. **No deploy workflow.**
+A GitHub Actions workflow example lives at `docs/ci.workflow.example.yml` (install → typecheck → build → test; **no deploy**).
+
+It is not installed under `.github/workflows/` in this initial push because the authenticated `gh` OAuth token on the scaffolding machine lacked the `workflow` scope. To enable CI: copy the example into `.github/workflows/ci.yml` and push with a token/PAT that includes the `workflow` scope (or add it via the GitHub UI).
 
 ## Next steps
 
