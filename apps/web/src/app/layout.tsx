@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { ParticleBackground } from "@/components/ParticleBackground";
 import { brand } from "@/config/brand";
 import "@/styles/globals.css";
 
@@ -39,6 +40,7 @@ export default function RootLayout({
             <div className="blob blob-a" />
             <div className="blob blob-b" />
             <div className="blob blob-c" />
+            <ParticleBackground />
           </div>
           <SiteHeader />
           <main>{children}</main>
