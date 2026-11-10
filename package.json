@@ -13,13 +13,14 @@
     "dev": "concurrently -n api,web -c red,cyan \"npm run dev -w @motter/api\" \"npm run dev -w @motter/web\"",
     "dev:web": "npm run dev -w @motter/web",
     "dev:api": "npm run dev -w @motter/api",
-    "build": "npm run build -w @motter/shared && npm run build -w @motter/api-client && npm run build -w @motter/api && npm run build -w @motter/web",
+    "build": "npm run build -w @motter/shared && npm run build -w @motter/core && npm run build -w @motter/api-client && npm run build -w @motter/api && npm run build -w @motter/web",
     "lint": "npm run lint -w @motter/web --if-present && npm run lint -w @motter/api --if-present",
-    "typecheck": "npm run build -w @motter/shared && npm run build -w @motter/api-client && npm run typecheck -w @motter/api && npm run typecheck -w @motter/web",
-    "test": "npm run test -w @motter/api",
+    "typecheck": "npm run build -w @motter/shared && npm run build -w @motter/core && npm run build -w @motter/api-client && npm run typecheck -w @motter/api && npm run typecheck -w @motter/web",
+    "test": "npm run test -w @motter/core && npm run test -w @motter/api",
     "clean": "rm -rf apps/*/dist apps/*/.next packages/*/dist node_modules apps/*/node_modules packages/*/node_modules",
-    "build:pages": "npm run build -w @motter/shared && npm run build -w @motter/api-client && PAGES_BASE_PATH=/budget-app-motter NEXT_PUBLIC_API_URL= npm run build -w @motter/web",
-    "deploy:pages": "npm run build:pages && touch apps/web/out/.nojekyll && gh-pages -d apps/web/out -b gh-pages --dotfiles"
+    "build:pages": "npm run build -w @motter/shared && npm run build -w @motter/core && npm run build -w @motter/api-client && PAGES_BASE_PATH=/budget-app-motter NEXT_PUBLIC_API_URL= npm run build -w @motter/web",
+    "deploy:pages": "npm run build:pages && touch apps/web/out/.nojekyll && gh-pages -d apps/web/out -b gh-pages --dotfiles",
+    "sync:daniel": "node scripts/sync-daniel-journey.mjs"
   },
   "engines": {
     "node": ">=20.19.0"
