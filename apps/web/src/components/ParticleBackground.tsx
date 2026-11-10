@@ -21,8 +21,8 @@ type Particle = {
   bokeh: boolean;
 };
 
-const NAVY = { r: 15, g: 30, b: 61 }; // #0F1E3D
-const CRIMSON = { r: 180, g: 35, b: 24 }; // #B42318
+const SLATE = { r: 186, g: 198, b: 220 }; // soft silver-blue, visible on #0b1020
+const CRIMSON = { r: 225, g: 29, b: 72 }; // #e11d48
 const MOUSE_RADIUS = 130;
 
 function prefersReducedMotion(): boolean {
@@ -68,8 +68,8 @@ function spawnParticle(
 }
 
 /**
- * Soft rising particles with glow — navy + crimson accents, no network lines.
- * Calm fintech backdrop layered over the CSS gradient blobs.
+ * Soft rising particles with glow — silver-blue + crimson accents, no network lines.
+ * Calm fintech backdrop layered over the CSS gradient blobs on the dark theme.
  */
 export function ParticleBackground() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -121,14 +121,14 @@ export function ParticleBackground() {
     };
 
     const drawParticle = (p: Particle, alphaScale: number) => {
-      const c = p.crimson ? CRIMSON : NAVY;
+      const c = p.crimson ? CRIMSON : SLATE;
       // Fade in near bottom, fade out near top
       const edge = Math.min(1, p.y / (height * 0.18), (height - p.y) / (height * 0.2));
       const baseAlpha = p.bokeh
-        ? 0.04 + 0.04 * (1 - p.r / 30)
+        ? 0.08 + 0.06 * (1 - p.r / 30)
         : p.crimson
-          ? 0.22
-          : 0.16;
+          ? 0.32
+          : 0.22;
       const alpha = Math.max(0, baseAlpha * edge * alphaScale);
 
       if (alpha < 0.01) return;

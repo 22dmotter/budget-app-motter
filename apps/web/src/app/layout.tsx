@@ -7,7 +7,7 @@ import { withBasePath } from "@/lib/basePath";
 import "@/styles/globals.css";
 
 export const viewport: Viewport = {
-  themeColor: "#0F1E3D",
+  themeColor: "#0b1020",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -56,7 +56,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" style={{ colorScheme: "dark", backgroundColor: "#0b1020" }}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
@@ -68,7 +68,7 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap"
           rel="stylesheet"
         />
-        <meta name="theme-color" content="#0F1E3D" />
+        <meta name="theme-color" content="#0b1020" />
         <link rel="manifest" href={withBasePath("/manifest.webmanifest")} />
         <link rel="icon" href={withBasePath("/favicon.ico")} />
         <link rel="apple-touch-icon" href={withBasePath("/icons/apple-touch-icon.png")} />

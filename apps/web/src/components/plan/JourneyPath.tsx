@@ -25,7 +25,7 @@ export function JourneyPath({ stations }: { stations: JourneyStation[] }) {
       aria-label="Your road to debt-free"
       preserveAspectRatio="xMidYMin meet"
     >
-      <path d={d} fill="none" stroke="#CBD5E1" strokeWidth="4" strokeLinecap="round" />
+      <path d={d} fill="none" stroke="#334155" strokeWidth="4" strokeLinecap="round" />
       {stations.map((s, i) => {
         const x = xOf(i);
         const y = yOf(i);
@@ -54,7 +54,7 @@ export function JourneyPath({ stations }: { stations: JourneyStation[] }) {
         cx={xOf(markerIndex)}
         cy={yOf(markerIndex)}
         r="3.5"
-        fill="#0F1E3D"
+        fill="#f1f5f9"
         className="you-are-here"
       />
     </svg>

@@ -9,7 +9,6 @@ import {
   worksheetHref,
 } from "@/config/pricing";
 
-type Theme = "light" | "dark";
 type Billing = "monthly" | "annual";
 
 const PLUS_FEATURES = [
@@ -41,22 +40,13 @@ const ROADMAP_FEATURES = [
 ];
 
 export function PricingPreview() {
-  const [theme, setTheme] = useState<Theme>("light");
   const [billing, setBilling] = useState<Billing>("annual");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get("theme") === "dark") setTheme("dark");
+    // ?theme=dark is ignored: the site is dark-only.
     if (params.get("billing") === "monthly") setBilling("monthly");
   }, []);
-
-  function setThemeAndUrl(next: Theme) {
-    setTheme(next);
-    const url = new URL(window.location.href);
-    if (next === "dark") url.searchParams.set("theme", "dark");
-    else url.searchParams.delete("theme");
-    window.history.replaceState({}, "", url);
-  }
 
   const plusPrice = useMemo(() => {
     if (billing === "annual") {
@@ -74,7 +64,7 @@ export function PricingPreview() {
   }, [billing]);
 
   return (
-    <div className="pricing-preview" data-theme={theme}>
+    <div className="pricing-preview">
       <header className="hero pricing-hero">
         <div className="wrap">
           <span className="eyebrow">{pricing.previewLabel}</span>
@@ -107,22 +97,6 @@ export function PricingPreview() {
                 onClick={() => setBilling("annual")}
               >
                 Annual
-              </button>
-            </div>
-            <div className="theme-toggle" role="group" aria-label="Color theme">
-              <button
-                type="button"
-                aria-pressed={theme === "light"}
-                onClick={() => setThemeAndUrl("light")}
-              >
-                Light
-              </button>
-              <button
-                type="button"
-                aria-pressed={theme === "dark"}
-                onClick={() => setThemeAndUrl("dark")}
-              >
-                Dark
               </button>
             </div>
           </div>
