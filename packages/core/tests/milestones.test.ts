@@ -72,7 +72,7 @@ describe("deriveJourney stations", () => {
       ],
     });
     const j = deriveJourney(app([d]), TODAY);
-    expect(j.stations.find((s) => s.id === "first-debt-paid")?.achieved).toBe(false);
+    expect(j.stations.find((s) => s.id === "debt-closed:a")?.achieved).toBe(false);
     expect(j.stations.find((s) => s.id === "debt-free")?.achieved).toBe(false);
     expect(j.badges.find((b) => b.id === `debt-closed:a`)?.earned).toBe(false);
   });
@@ -91,11 +91,17 @@ describe("deriveJourney stations", () => {
       entries: [entry("a", "2026-08-01", 200000, 0)],
     });
     const j = deriveJourney(app([a, b]), TODAY);
-    expect(j.stations.find((s) => s.id === "first-debt-paid")?.achieved).toBe(true);
-    expect(j.stations.find((s) => s.id === "first-debt-paid")?.achievedOn).toBe("2026-03-01");
+    const first = j.stations.find((s) => s.id === "debt-closed:visa");
+    expect(first?.achieved).toBe(true);
+    expect(first?.achievedOn).toBe("2026-03-01");
+    expect(first?.label).toBe("First debt paid off: Visa");
     const extra = j.stations.find((s) => s.id === "debt-closed:auto");
     expect(extra?.achieved).toBe(true);
     expect(extra?.achievedOn).toBe("2026-08-01");
+    expect(extra?.label).toBe("Paid off: Auto");
+    const ids = j.stations.map((s) => s.id);
+    expect(ids.indexOf("debt-closed:visa")).toBeLessThan(ids.indexOf("debt-closed:auto"));
+    expect(ids.indexOf("debt-closed:auto")).toBeLessThan(ids.indexOf("debt-free"));
     expect(j.stations.find((s) => s.id === "debt-free")?.achieved).toBe(true);
     expect(j.badges.find((b) => b.id === "snowball-rolling")?.earned).toBe(true);
   });
@@ -216,5 +222,146 @@ describe("streaks", () => {
     // 2026-03-30 is Monday, 2026-04-01 is Wednesday of the same week
     expect(weekKey("2026-03-30")).toBe(weekKey("2026-04-01"));
     expect(weekKey("2026-03-29")).not.toBe(weekKey("2026-03-30"));
+  });
+});
+
+describe("station ordering", () => {
+  function ids(j: ReturnType<typeof deriveJourney>): string[] {
+    return j.stations.map((s) => s.id);
+  }
+
+  it("orders future stations by projected month under snowball (small debt first, not bunched after 75%)", () => {
+    // $500 + $2,000 at 0%, mins $50 / $100, extra $50. Snowball pays the $500 card first.
+    const card = debt("card", {
+      name: "Card",
+      startingCents: 50000,
+      openingCents: 50000,
+      minimumPaymentCents: 5000,
+      aprBps: 0,
+    });
+    const auto = debt("auto", {
+      name: "Auto",
+      startingCents: 200000,
+      openingCents: 200000,
+      minimumPaymentCents: 10000,
+      aprBps: 0,
+    });
+    const j = deriveJourney(app([card, auto], 5000), TODAY);
+    const order = ids(j);
+    expect(j.stations[0]?.id).toBe("plan-made");
+    expect(j.stations[1]?.id).toBe("first-payment");
+    expect(j.stations.find((s) => s.id === "debt-closed:card")?.label).toBe("First debt paid off: Card");
+    expect(j.stations.find((s) => s.id === "debt-closed:auto")?.label).toBe("Paid off: Auto");
+    // The first (smaller) debt should land before 75% and 100%, not after every percent stop.
+    expect(order.indexOf("debt-closed:card")).toBeLessThan(order.indexOf("percent-75"));
+    expect(order.indexOf("debt-closed:card")).toBeLessThan(order.indexOf("debt-closed:auto"));
+    expect(order.indexOf("percent-10")).toBeLessThan(order.indexOf("percent-25"));
+    expect(order.indexOf("percent-25")).toBeLessThan(order.indexOf("percent-50"));
+    expect(order.indexOf("percent-50")).toBeLessThan(order.indexOf("percent-75"));
+    expect(order.indexOf("percent-75")).toBeLessThan(order.indexOf("debt-free"));
+    expect(order.at(-1)).toBe("debt-free");
+    // Projected months are monotonic along the path (excluding pinned plan/payment).
+    const dated = j.stations.filter((s) => s.projectedDate && !s.achieved && s.id !== "first-payment");
+    const months = dated.map((s) => s.projectedDate!);
+    expect([...months].sort()).toEqual(months);
+  });
+
+  it("orders future stations by projected month under avalanche (high APR first)", () => {
+    // Low min on the cheap card so it is not paid off by minimums before the high-APR balance.
+    const low = debt("store", {
+      name: "Store card",
+      startingCents: 50000,
+      openingCents: 50000,
+      minimumPaymentCents: 2500,
+      aprBps: 500, // 5%
+    });
+    const high = debt("visa", {
+      name: "Visa",
+      startingCents: 200000,
+      openingCents: 200000,
+      minimumPaymentCents: 4000,
+      aprBps: 2499, // 24.99%
+    });
+    const snow = deriveJourney(app([low, high], 10000), TODAY);
+    const av = deriveJourney(
+      validateAppState(
+        {
+          ...app([low, high], 10000),
+          plan: { ...app([low, high], 10000).plan, strategy: "avalanche" },
+        },
+        TODAY
+      ),
+      TODAY
+    );
+    // Snowball: smaller Store card first. Avalanche: high-APR Visa first.
+    expect(snow.stations.find((s) => s.id === "debt-closed:store")?.label).toBe(
+      "First debt paid off: Store card"
+    );
+    expect(av.stations.find((s) => s.id === "debt-closed:visa")?.label).toBe("First debt paid off: Visa");
+    expect(av.stations.find((s) => s.id === "debt-closed:store")?.label).toBe("Paid off: Store card");
+    const snowOrder = ids(snow);
+    const avOrder = ids(av);
+    expect(snowOrder.indexOf("debt-closed:store")).toBeLessThan(snowOrder.indexOf("debt-closed:visa"));
+    expect(avOrder.indexOf("debt-closed:visa")).toBeLessThan(avOrder.indexOf("debt-closed:store"));
+    expect(snowOrder).not.toEqual(avOrder);
+  });
+
+  it("reorders when a debt balance is updated so a different debt is paid first", () => {
+    const card = debt("card", {
+      name: "Card",
+      startingCents: 50000,
+      openingCents: 50000,
+      minimumPaymentCents: 5000,
+      aprBps: 0,
+    });
+    const auto = debt("auto", {
+      name: "Auto",
+      startingCents: 200000,
+      openingCents: 200000,
+      minimumPaymentCents: 10000,
+      aprBps: 0,
+    });
+    const before = deriveJourney(app([card, auto], 5000), TODAY);
+    expect(before.stations.find((s) => s.id === "debt-closed:card")?.label).toBe(
+      "First debt paid off: Card"
+    );
+
+    // Card ballooned past Auto — snowball now finishes Auto first.
+    const grown = debt("card", {
+      name: "Card",
+      startingCents: 50000,
+      openingCents: 400000,
+      openingDate: TODAY,
+      minimumPaymentCents: 5000,
+      aprBps: 0,
+    });
+    const after = deriveJourney(app([grown, auto], 5000), TODAY);
+    expect(after.stations.find((s) => s.id === "debt-closed:auto")?.label).toBe(
+      "First debt paid off: Auto"
+    );
+    expect(after.stations.find((s) => s.id === "debt-closed:card")?.label).toBe("Paid off: Card");
+    const order = ids(after);
+    expect(order.indexOf("debt-closed:auto")).toBeLessThan(order.indexOf("debt-closed:card"));
+  });
+
+  it("orders already-achieved stations by the date they were crossed, ties by threshold", () => {
+    const a = debt("visa", {
+      name: "Visa",
+      startingCents: 50000,
+      openingCents: 50000,
+      entries: [entry("v", "2026-03-01", 50000, 0)],
+    });
+    const b = debt("auto", {
+      name: "Auto",
+      startingCents: 200000,
+      openingCents: 200000,
+      entries: [entry("a", "2026-08-01", 200000, 0)],
+    });
+    const j = deriveJourney(app([a, b]), TODAY);
+    const order = ids(j);
+    expect(order.indexOf("first-thousand")).toBeLessThan(order.indexOf("percent-50"));
+    expect(order.indexOf("debt-closed:visa")).toBeLessThan(order.indexOf("debt-closed:auto"));
+    expect(order.indexOf("percent-50")).toBeLessThan(order.indexOf("debt-closed:auto"));
+    expect(j.stations.find((s) => s.id === "debt-closed:visa")?.label).toBe("First debt paid off: Visa");
   });
 });

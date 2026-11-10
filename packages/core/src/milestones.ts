@@ -327,6 +327,59 @@ function station(
   };
 }
 
+
+function reductionAtPayoffMonth(
+  payoff: PayoffResult | null,
+  startingCents: number,
+  yearMonth: string | null
+): number | null {
+  if (!payoff?.ok || !yearMonth) return null;
+  const row = payoff.schedule.find((r) => r.yearMonth === yearMonth);
+  if (!row) return null;
+  return startingCents - row.endBalanceCents;
+}
+
+type RankedStation = { station: JourneyStation; threshold: number; tie?: number };
+
+function compareRanked(a: RankedStation, b: RankedStation): number {
+  if (a.station.achieved !== b.station.achieved) return a.station.achieved ? -1 : 1;
+  if (a.station.achieved) {
+    const da = a.station.achievedOn ?? "0000-00-00";
+    const db = b.station.achievedOn ?? "0000-00-00";
+    if (da !== db) return da.localeCompare(db);
+  } else {
+    const pa = a.station.projectedDate ?? "9999-99";
+    const pb = b.station.projectedDate ?? "9999-99";
+    if (pa !== pb) return pa.localeCompare(pb);
+  }
+  if (a.threshold !== b.threshold) return a.threshold - b.threshold;
+  const ta = a.tie ?? 0;
+  const tb = b.tie ?? 0;
+  if (ta !== tb) return ta - tb;
+  return a.station.id.localeCompare(b.station.id);
+}
+
+
+function debtAttackIndex(
+  debts: TrackedDebt[],
+  strategy: AppState["plan"]["strategy"],
+  customOrder?: string[] | null
+): Map<string, number> {
+  const customIndex = new Map((customOrder ?? []).map((id, i) => [id, i]));
+  const sorted = debts.slice().sort((a, b) => {
+    const ba = currentBalanceCents(a);
+    const bb = currentBalanceCents(b);
+    if (strategy === "custom") {
+      const ai = customIndex.has(a.id) ? customIndex.get(a.id)! : 10_000;
+      const bi = customIndex.has(b.id) ? customIndex.get(b.id)! : 10_000;
+      return ai - bi;
+    }
+    if (strategy === "avalanche") return b.aprBps - a.aprBps || ba - bb;
+    return ba - bb || b.aprBps - a.aprBps;
+  });
+  return new Map(sorted.map((d, i) => [d.id, i]));
+}
+
 export function deriveJourney(state: AppState, today: string): Journey {
   const debts = state.debts;
   const totals = progressTotals(debts);
@@ -372,14 +425,14 @@ export function deriveJourney(state: AppState, today: string): Journey {
   const thousandOn = firstDateFor(debts, (r) => r >= 100_000);
   const pct = (p: number) => firstDateFor(debts, (r) => start > 0 && r * 100 >= start * p);
 
-  const payoffEvents: { debtId: string; date: string; name: string }[] = [];
+  const payoffEvents: { debtId: string; date: string; name: string; reductionCents: number }[] = [];
   const seenPaid = new Set<string>();
   const { events } = walkHistory(debts);
   for (const e of events) {
     if (e.paidOff && !seenPaid.has(e.debtId)) {
       seenPaid.add(e.debtId);
       const name = debts.find((d) => d.id === e.debtId)?.name ?? "Debt";
-      payoffEvents.push({ debtId: e.debtId, date: e.date, name });
+      payoffEvents.push({ debtId: e.debtId, date: e.date, name, reductionCents: e.reductionCents });
     }
   }
   // Relock: a later rise means not currently paid off — station "achieved" follows current status,
@@ -388,108 +441,124 @@ export function deriveJourney(state: AppState, today: string): Journey {
     debts.filter((d) => currentBalanceCents(d) === 0 && seenPaid.has(d.id)).map((d) => d.id)
   );
 
-  const firstPayoff = payoffEvents[0];
-  const additionalDebts = debts.filter((d) => !firstPayoff || d.id !== firstPayoff.debtId);
-
   const need = (targetReduction: number) => Math.max(0, targetReduction - reduction);
 
-  const stations: JourneyStation[] = [
-    station({
-      id: "plan-made",
-      label: "Plan made",
-      achieved: planMade,
-      achievedOn: planMade ? latestOpeningDate(debts) : null,
-    }),
-    station({
-      id: "first-payment",
-      label: "First payment logged",
-      achieved: !!firstPaymentOn,
-      achievedOn: firstPaymentOn,
-    }),
-    station({
-      id: "first-thousand",
-      label: "First $1,000 paid down",
-      achieved: reduction >= 100_000,
-      achievedOn: thousandOn,
-      remainingCents: need(100_000),
-      projectedDate: projectDateForReduction(payoff, start, 100_000),
-    }),
-    station({
-      id: "percent-10",
-      label: "10% paid down",
-      achieved: start > 0 && reduction * 100 >= start * 10,
-      achievedOn: pct(10),
-      remainingCents: need(Math.ceil(start * 0.1)),
-      projectedDate: projectDateForReduction(payoff, start, Math.ceil(start * 0.1)),
-    }),
-    station({
-      id: "percent-25",
-      label: "25% paid down",
-      achieved: start > 0 && reduction * 100 >= start * 25,
-      achievedOn: pct(25),
-      remainingCents: need(Math.ceil(start * 0.25)),
-      projectedDate: projectDateForReduction(payoff, start, Math.ceil(start * 0.25)),
-    }),
-    station({
-      id: "first-debt-paid",
-      label: "First debt paid off",
-      achieved: currentlyCleared.size > 0,
-      achievedOn: firstPayoff && currentlyCleared.size > 0 ? firstPayoff.date : null,
-      remainingCents: firstPayoff
-        ? currentlyCleared.has(firstPayoff.debtId)
-          ? 0
-          : currentBalanceCents(debts.find((d) => d.id === firstPayoff.debtId)!)
-        : Math.min(...debts.map((d) => currentBalanceCents(d)), remaining),
-      projectedDate: payoff?.ok
-        ? payoff.debts
-            .filter((d) => d.payoffYearMonth)
-            .sort((a, b) => (a.payoffMonth ?? 999) - (b.payoffMonth ?? 999))[0]?.payoffYearMonth ??
-          null
-        : null,
-    }),
-    station({
-      id: "percent-50",
-      label: "50% Halfway Home",
-      achieved: start > 0 && reduction * 100 >= start * 50,
-      achievedOn: pct(50),
-      remainingCents: need(Math.ceil(start * 0.5)),
-      projectedDate: projectDateForReduction(payoff, start, Math.ceil(start * 0.5)),
-    }),
-    station({
-      id: "percent-75",
-      label: "75% paid down",
-      achieved: start > 0 && reduction * 100 >= start * 75,
-      achievedOn: pct(75),
-      remainingCents: need(Math.ceil(start * 0.75)),
-      projectedDate: projectDateForReduction(payoff, start, Math.ceil(start * 0.75)),
-    }),
+  const planMadeStation = station({
+    id: "plan-made",
+    label: "Plan made",
+    achieved: planMade,
+    achievedOn: planMade ? latestOpeningDate(debts) : null,
+  });
+  const firstPaymentStation = station({
+    id: "first-payment",
+    label: "First payment logged",
+    achieved: !!firstPaymentOn,
+    achievedOn: firstPaymentOn,
+  });
+
+  type Ranked = RankedStation;
+
+  const ranked: Ranked[] = [
+    {
+      threshold: 100_000,
+      station: station({
+        id: "first-thousand",
+        label: "First $1,000 paid down",
+        achieved: reduction >= 100_000,
+        achievedOn: thousandOn,
+        remainingCents: need(100_000),
+        projectedDate: projectDateForReduction(payoff, start, 100_000),
+      }),
+    },
+    {
+      threshold: Math.ceil(start * 0.1),
+      station: station({
+        id: "percent-10",
+        label: "10% paid down",
+        achieved: start > 0 && reduction * 100 >= start * 10,
+        achievedOn: pct(10),
+        remainingCents: need(Math.ceil(start * 0.1)),
+        projectedDate: projectDateForReduction(payoff, start, Math.ceil(start * 0.1)),
+      }),
+    },
+    {
+      threshold: Math.ceil(start * 0.25),
+      station: station({
+        id: "percent-25",
+        label: "25% paid down",
+        achieved: start > 0 && reduction * 100 >= start * 25,
+        achievedOn: pct(25),
+        remainingCents: need(Math.ceil(start * 0.25)),
+        projectedDate: projectDateForReduction(payoff, start, Math.ceil(start * 0.25)),
+      }),
+    },
+    {
+      threshold: Math.ceil(start * 0.5),
+      station: station({
+        id: "percent-50",
+        label: "50% Halfway Home",
+        achieved: start > 0 && reduction * 100 >= start * 50,
+        achievedOn: pct(50),
+        remainingCents: need(Math.ceil(start * 0.5)),
+        projectedDate: projectDateForReduction(payoff, start, Math.ceil(start * 0.5)),
+      }),
+    },
+    {
+      threshold: Math.ceil(start * 0.75),
+      station: station({
+        id: "percent-75",
+        label: "75% paid down",
+        achieved: start > 0 && reduction * 100 >= start * 75,
+        achievedOn: pct(75),
+        remainingCents: need(Math.ceil(start * 0.75)),
+        projectedDate: projectDateForReduction(payoff, start, Math.ceil(start * 0.75)),
+      }),
+    },
   ];
 
-  for (const d of additionalDebts) {
+  const attack = debtAttackIndex(debts, state.plan.strategy, state.plan.customOrder);
+  for (const d of debts) {
     const ev = payoffEvents.find((p) => p.debtId === d.id);
     const cleared = currentlyCleared.has(d.id);
-    stations.push(
-      station({
+    const projectedDate = projectDateForDebtClosed(payoff, d.id);
+    const threshold = ev
+      ? ev.reductionCents
+      : (reductionAtPayoffMonth(payoff, start, projectedDate) ?? start);
+    ranked.push({
+      threshold,
+      tie: attack.get(d.id) ?? 999,
+      station: station({
         id: `debt-closed:${d.id}`,
         label: `Paid off: ${d.name}`,
         achieved: cleared,
         achievedOn: cleared ? ev?.date ?? null : null,
         remainingCents: currentBalanceCents(d),
-        projectedDate: projectDateForDebtClosed(payoff, d.id),
-      })
-    );
+        projectedDate,
+      }),
+    });
   }
 
-  stations.push(
-    station({
+  ranked.push({
+    threshold: start,
+    tie: 10_000,
+    station: station({
       id: "debt-free",
       label: "100% Debt-Free",
       achieved: start > 0 && remaining === 0 && currentlyCleared.size === debts.length && debts.length > 0,
       achievedOn: pct(100),
       remainingCents: remaining,
       projectedDate: payoff?.debtFreeYearMonth ?? null,
-    })
-  );
+    }),
+  });
+
+  ranked.sort(compareRanked);
+  const firstDebt = ranked.find((r) => r.station.id.startsWith("debt-closed:"));
+  if (firstDebt) {
+    const name = debts.find((d) => `debt-closed:${d.id}` === firstDebt.station.id)?.name ?? "Debt";
+    firstDebt.station.label = `First debt paid off: ${name}`;
+  }
+
+  const stations: JourneyStation[] = [planMadeStation, firstPaymentStation, ...ranked.map((r) => r.station)];
 
   // Fix remaining for already-achieved
   for (const s of stations) {
@@ -603,5 +672,10 @@ function extraMileDate(debts: TrackedDebt[], plannedMonthlyCents: number): strin
 
 export function uncelebratedStations(journey: Journey, celebratedIds: string[]): JourneyStation[] {
   const seen = new Set(celebratedIds);
-  return journey.stations.filter((s) => s.achieved && !seen.has(s.id));
+  const firstDebt = journey.stations.find((s) => s.id.startsWith("debt-closed:"));
+  return journey.stations.filter((s) => {
+    if (!s.achieved || seen.has(s.id)) return false;
+    if (firstDebt && s.id === firstDebt.id && seen.has("first-debt-paid")) return false;
+    return true;
+  });
 }
