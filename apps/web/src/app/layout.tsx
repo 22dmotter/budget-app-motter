@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     title: `${brand.name} — See your path out of debt`,
     description: siteDescription,
     url: siteUrl,
-    images: [{ url: withBasePath("/icons/icon-512.png"), width: 512, height: 512, alt: brand.name }],
+    images: [{ url: "/icons/icon-512.png", width: 512, height: 512, alt: brand.name }],
   },
   twitter: {
     card: "summary",

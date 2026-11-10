@@ -29,6 +29,7 @@
 html {
   scroll-behavior: smooth;
   background: var(--bg);
+  overflow-x: clip;
 }
 
 body {
@@ -39,6 +40,7 @@ body {
   -webkit-font-smoothing: antialiased;
   letter-spacing: -0.005em;
   min-height: 100vh;
+  overflow-x: clip;
 }
 
 h1,
@@ -392,6 +394,8 @@ blockquote cite {
 }
 
 .page-shell {
+  overflow-x: clip;
+
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -633,7 +637,7 @@ input, select {
 .plain-table { width: 100%; border-collapse: collapse; }
 .plain-table th, .plain-table td { text-align: left; padding: 8px 8px 8px 0; vertical-align: middle; }
 .plain-table.compact td, .plain-table.compact th { font-size: 0.9rem; padding: 6px 8px 6px 0; }
-.table-scroll { overflow-x: auto; }
+.table-scroll { overflow-x: auto; max-width: 100%; width: 100%; min-width: 0; -webkit-overflow-scrolling: touch; }
 .plain-table input { width: 100%; min-width: 6.5rem; }
 .linkish {
   background: none;
