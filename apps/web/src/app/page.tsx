@@ -21,6 +21,9 @@ export default function HomePage() {
               <Link href="/app" className="btn ghost">
                 Open my plan
               </Link>
+              <Link href="/free-worksheet" className="btn">
+                Get the free worksheet
+              </Link>
             </div>
           </div>
           <QuickStart />

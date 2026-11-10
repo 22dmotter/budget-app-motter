@@ -20,7 +20,8 @@
     "clean": "rm -rf apps/*/dist apps/*/.next packages/*/dist node_modules apps/*/node_modules packages/*/node_modules",
     "build:pages": "npm run build -w @motter/shared && npm run build -w @motter/core && npm run build -w @motter/api-client && PAGES_BASE_PATH=/budget-app-motter NEXT_PUBLIC_API_URL= npm run build -w @motter/web",
     "deploy:pages": "npm run build:pages && touch apps/web/out/.nojekyll && gh-pages -d apps/web/out -b gh-pages --dotfiles",
-    "sync:daniel": "node scripts/sync-daniel-journey.mjs"
+    "sync:daniel": "node scripts/sync-daniel-journey.mjs",
+    "generate:worksheet": "node scripts/generate-snowball-worksheet.mjs"
   },
   "engines": {
     "node": ">=20.19.0"
@@ -28,7 +29,9 @@
   "devDependencies": {
     "concurrently": "^9.1.2",
     "gh-pages": "^6.3.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "playwright-core": "^1.49.0",
+    "qrcode": "^1.5.4"
   },
   "allowScripts": {
     "esbuild@0.28.2": true
