@@ -170,7 +170,7 @@ export function PlanApp() {
               {notice}
             </p>
           ) : null}
-          <InstallHint />
+          {state.onboardingComplete ? <InstallHint /> : null}
           {toast ? (
             <p className="toast" role="status">
               {toast}

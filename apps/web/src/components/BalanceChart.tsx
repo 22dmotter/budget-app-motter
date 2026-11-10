@@ -6,7 +6,7 @@ export function BalanceChart({ points, title }: { points: Point[]; title?: strin
   if (points.length < 2) return null;
   const w = 640;
   const h = 220;
-  const pad = { l: 48, r: 12, t: 16, b: 28 };
+  const pad = { l: 78, r: 16, t: 16, b: 28 };
   const max = Math.max(...points.map((p) => p.cents), 1);
   const innerW = w - pad.l - pad.r;
   const innerH = h - pad.t - pad.b;

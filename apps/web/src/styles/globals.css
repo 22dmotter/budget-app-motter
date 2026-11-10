@@ -743,6 +743,7 @@ input, select {
   .side-nav .tab-btn.active { background: rgba(255,255,255,0.08); color: #fff; }
   .side-nav .tab-primary { background: var(--accent); color: #fff; }
   .app-main { padding: 28px 32px 48px; }
+  .install-hint { display: none; }
 }
 
 .streak-row, .plus-row { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -763,11 +764,11 @@ input, select {
   font-size: 0.9rem;
 }
 .badge-shelf li.earned { color: var(--navy); border-color: rgba(180,35,24,0.35); }
-.journey-svg { width: 100%; height: auto; max-height: 720px; background: #fff; border-radius: 12px; border: 1px solid var(--line); }
+.journey-svg { width: 100%; height: auto; max-width: 36rem; margin: 0 auto; display: block; background: #fff; border-radius: 12px; border: 1px solid var(--line); }
 .station-done { fill: #B42318; }
 .station-next { fill: #fff; stroke: #B42318; stroke-width: 1.5; }
 .station-later { fill: #CBD5E1; }
-.station-label { font-size: 4.2px; fill: #0F1E3D; font-family: Inter, sans-serif; }
+.station-label { font-size: 13px; fill: #0F1E3D; font-family: Inter, sans-serif; font-weight: 500; }
 .station-next { animation: pulse-next 2.4s ease-in-out infinite; }
 @keyframes pulse-next {
   0%, 100% { opacity: 1; }
