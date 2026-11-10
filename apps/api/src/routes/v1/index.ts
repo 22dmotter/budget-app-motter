@@ -5,6 +5,7 @@ import { budgetRoutes } from "./budgets.js";
 import { debtRoutes } from "./debts.js";
 import { paymentRoutes } from "./payments.js";
 import { leadRoutes } from "./leads.js";
+import { calculateRoutes } from "./calculate.js";
 
 export const v1Routes: FastifyPluginAsync = async (app) => {
   await app.register(healthRoutes);
@@ -13,4 +14,5 @@ export const v1Routes: FastifyPluginAsync = async (app) => {
   await app.register(debtRoutes);
   await app.register(paymentRoutes);
   await app.register(leadRoutes);
+  await app.register(calculateRoutes);
 };
