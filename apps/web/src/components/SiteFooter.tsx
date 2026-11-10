@@ -16,10 +16,10 @@ export function SiteFooter() {
           <Link href="/">Home</Link>
           <Link href="/calculator">Calculator</Link>
           <Link href="/app">My Plan</Link>
-          <Link href="/downloads">Free Spreadsheets</Link>
-          <Link href="/free-worksheet">Free worksheet</Link>
-          <Link href="/about">About</Link>
           <Link href="/pricing">Pricing</Link>
+          <Link href="/free-worksheet">Free worksheet</Link>
+          <Link href="/downloads">Free Spreadsheets</Link>
+          <Link href="/about">About</Link>
           <Link href="/login">Log in</Link>
           <Link href="/signup">Sign up</Link>
           <a

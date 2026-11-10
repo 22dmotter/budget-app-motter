@@ -126,7 +126,7 @@ a.text-link:hover {
 .nav-links {
   display: none;
   list-style: none;
-  gap: 22px;
+  gap: 28px;
 }
 
 .nav-links a {
@@ -832,40 +832,68 @@ input, select {
   .site-header .btn.sm { margin-left: auto; }
 }
 
-/* —— Free worksheet + preview pricing (additive) —— */
+/* Header actions: one highlighted worksheet CTA */
+.site-header { z-index: 20; }
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
-.nav-links a.nav-freebie {
-  color: #fecaca;
+.nav-menu {
+  position: relative;
+  display: none;
 }
 
-.nav-links a.nav-freebie:hover {
-  color: #ffffff;
-}
-
-.site-header .btn.ghost-on-dark {
-  background: transparent;
+.nav-menu summary {
+  list-style: none;
+  cursor: pointer;
   color: var(--header-fg);
-  border: 1px solid rgba(248, 250, 252, 0.35);
-  box-shadow: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 10px;
 }
 
-.site-header .btn.ghost-on-dark:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #ffffff;
-  border-color: #ffffff;
-  transform: none;
+.nav-menu summary::-webkit-details-marker { display: none; }
+
+.nav-menu ul {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  background: #fff;
+  color: var(--navy);
+  list-style: none;
+  min-width: 12rem;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  box-shadow: 0 8px 24px rgba(15, 30, 61, 0.18);
+  padding: 6px;
+  z-index: 20;
 }
+
+.nav-menu a {
+  display: block;
+  padding: 10px 12px;
+  min-height: 44px;
+  text-decoration: none;
+  color: var(--navy);
+  font-weight: 500;
+  border-radius: 8px;
+}
+
+.nav-menu a:hover { background: var(--bg-alt); }
 
 @media (max-width: 859px) {
-  .header-signup {
-    display: none;
-  }
+  .nav-menu { display: block; }
+}
+
+@media (min-width: 860px) {
+  .nav-menu { display: none; }
 }
 
 .consent-row {
