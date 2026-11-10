@@ -641,6 +641,19 @@ select:-webkit-autofill {
   box-shadow: 0 0 0 1000px var(--bg) inset;
   transition: background-color 9999s ease-out;
 }
+input[type="checkbox"],
+input[type="radio"] {
+  width: 1.15rem;
+  height: 1.15rem;
+  min-height: 0;
+  min-width: 0;
+  padding: 0;
+  accent-color: var(--accent);
+  background: none;
+  border: 0;
+  box-shadow: none;
+  flex-shrink: 0;
+}
 .quick-result { min-height: 7rem; }
 .stat-num {
   font-family: "Space Grotesk", Inter, sans-serif;
