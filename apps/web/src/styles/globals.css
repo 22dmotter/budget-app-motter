@@ -743,7 +743,6 @@ input, select {
   .side-nav .tab-btn.active { background: rgba(255,255,255,0.08); color: #fff; }
   .side-nav .tab-primary { background: var(--accent); color: #fff; }
   .app-main { padding: 28px 32px 48px; }
-  .install-hint { display: none; }
 }
 
 .streak-row, .plus-row { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -801,6 +800,9 @@ input, select {
   border-radius: 12px;
   padding: 10px 14px;
   margin: 8px 0;
+}
+@media (min-width: 860px) {
+  .install-hint { display: none; }
 }
 .celebrate-scrim {
   position: fixed;
