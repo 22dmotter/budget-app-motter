@@ -10,11 +10,13 @@ import {
   formatCents,
   formatYearMonth,
   parseMoneyInput,
+  parsePercentInput,
   pickLine,
   progressTotals,
   summarizeBudget,
   todayIso,
   parseAppState,
+  removeDebt,
   undoLatestEntry,
   type JourneyStation,
 } from "@motter/core";
@@ -621,6 +623,80 @@ function MoreView({
           />
         </label>
       </div>
+      <h2>Your debts</h2>
+      {state.debts.length ? (
+        <ul className="debt-list">
+          {state.debts.map((d) => (
+            <li key={d.id} className="card solid form-stack">
+              <label>
+                Name
+                <input
+                  defaultValue={d.name}
+                  onBlur={(e) => {
+                    const name = e.target.value.trim() || d.name;
+                    persist({
+                      ...state,
+                      debts: state.debts.map((x) => (x.id === d.id ? { ...x, name } : x)),
+                    });
+                  }}
+                />
+              </label>
+              <label>
+                APR %
+                <input
+                  inputMode="decimal"
+                  defaultValue={(d.aprBps / 100).toString()}
+                  onBlur={(e) => {
+                    const bps = parsePercentInput(e.target.value);
+                    if (bps === null) return;
+                    persist({
+                      ...state,
+                      debts: state.debts.map((x) => (x.id === d.id ? { ...x, aprBps: bps } : x)),
+                    });
+                  }}
+                />
+              </label>
+              <label>
+                Monthly minimum
+                <input
+                  inputMode="decimal"
+                  defaultValue={(d.minimumPaymentCents / 100).toString()}
+                  onBlur={(e) => {
+                    const cents = parseMoneyInput(e.target.value);
+                    if (cents === null) return;
+                    persist({
+                      ...state,
+                      debts: state.debts.map((x) =>
+                        x.id === d.id ? { ...x, minimumPaymentCents: cents } : x
+                      ),
+                    });
+                  }}
+                />
+              </label>
+              <button
+                type="button"
+                className="linkish"
+                onClick={() => {
+                  if (!confirm(`Remove ${d.name} from this plan? This cannot be undone.`)) return;
+                  try {
+                    persist(removeDebt(state, d.id, today), `${d.name} removed.`);
+                  } catch (e) {
+                    setNotice(e instanceof Error ? e.message : "Could not remove that debt.");
+                  }
+                }}
+              >
+                Remove this debt
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>
+          <Link href="/calculator" className="text-link">
+            Add debts in the calculator
+          </Link>
+        </p>
+      )}
       <h2>Coming later</h2>
       <ul className="plus-list">
         <li>
@@ -639,7 +715,7 @@ function MoreView({
           Shareable milestone cards <PlusBadge />
         </li>
       </ul>
-      <p className="muted">These will be easy to offer as Plus later. Nothing is locked today — and there are no prices yet.</p>
+      <p className="muted">These will be easy to offer as Plus later. Nothing is locked today, and checkout is not live yet.</p>
       <p>
         <Link href="/calculator" className="text-link">
           Open the calculator

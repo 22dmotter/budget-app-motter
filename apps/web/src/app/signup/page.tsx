@@ -9,12 +9,13 @@ export default function SignupPage() {
   return (
     <header className="hero">
       <div className="wrap">
-        <span className="eyebrow">Auth · Placeholder</span>
+        <span className="eyebrow">Accounts come later</span>
         <h1>
           Create an <em>account</em>
         </h1>
         <p className="lead">
-          UI shell only. Signups are not collected yet — this form does nothing.
+          Signups are not collected yet. You can use the calculator and My Plan right now without
+          an account — your data stays on this device.
         </p>
         <div className="card form-card">
           <label>
@@ -23,31 +24,25 @@ export default function SignupPage() {
           </label>
           <label>
             Email
-            <input
-              type="email"
-              name="email"
-              placeholder="you@example.com"
-              disabled
-            />
+            <input type="email" name="email" placeholder="you@example.com" disabled />
           </label>
           <label>
             Password
-            <input
-              type="password"
-              name="password"
-              placeholder="••••••••"
-              disabled
-            />
+            <input type="password" name="password" placeholder="••••••••" disabled />
           </label>
           <button type="button" className="btn" disabled>
-            Sign up (disabled)
+            Sign up (not available yet)
           </button>
           <p className="notice">
-            <span className="ph">PLACEHOLDER</span> — POST /v1/auth/signup and
-            POST /v1/leads return 501 until implemented.{" "}
-            <Link href="/login" className="text-link">
-              Log in
+            This form does nothing until accounts launch. In the meantime,{" "}
+            <Link href="/calculator" className="text-link">
+              make a plan in the calculator
+            </Link>{" "}
+            or{" "}
+            <Link href="/app" className="text-link">
+              open My Plan
             </Link>
+            .
           </p>
         </div>
       </div>

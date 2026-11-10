@@ -8,6 +8,7 @@ import {
   emptyAppState,
   formatCents,
   formatYearMonth,
+  MAX_CENTS,
   parseMoneyInput,
   parsePercentInput,
   planDebts,
@@ -33,7 +34,7 @@ export function CalculatorApp() {
   const router = useRouter();
   const [debts, setDebts] = useState<CalculatorDraftDebt[]>([emptyRow(), emptyRow()]);
   const [extra, setExtra] = useState("");
-  const [strategy, setStrategy] = useState<"snowball" | "avalanche">("snowball");
+  const [strategy, setStrategy] = useState<PayoffStrategy>("snowball");
   const [hint, setHint] = useState<string | null>(null);
   const [showSchedule, setShowSchedule] = useState(false);
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
@@ -67,15 +68,20 @@ export function CalculatorApp() {
         const hasAny = d.name.trim() || d.balance.trim() || d.apr.trim() || d.minimum.trim();
         if (!hasAny) return null;
         if (balanceCents === null || balanceCents < 0) {
-          errors.push(`Row ${i + 1}: enter a balance.`);
+          const tooBig = /\d/.test(d.balance) && Number(d.balance.replace(/[$,\s]/g, "")) > MAX_CENTS / 100;
+          errors.push(
+            tooBig
+              ? `Row ${i + 1}: that's more than we can plan for (the maximum is $10,000,000).`
+              : `Row ${i + 1}: enter a balance as dollars.`
+          );
           return null;
         }
         if (aprBps === null) {
-          errors.push(`Row ${i + 1}: enter the APR as a percent (for example 19.99).`);
+          errors.push(`Row ${i + 1}: enter the APR as a percent (0 is fine; for example 19.99).`);
           return null;
         }
         if (minimumPaymentCents === null) {
-          errors.push(`Row ${i + 1}: enter the monthly minimum.`);
+          errors.push(`Row ${i + 1}: enter the monthly minimum as dollars.`);
           return null;
         }
         return {
@@ -98,6 +104,7 @@ export function CalculatorApp() {
       debts: parsed.rows,
       extraMonthlyCents: parsed.extraMonthlyCents,
       strategy,
+      customOrder: debts.map((d) => d.id),
       startMonth: currentYearMonth(),
       compare: true,
     });
@@ -105,6 +112,21 @@ export function CalculatorApp() {
 
   function update(id: string, field: keyof CalculatorDraftDebt, value: string) {
     setDebts((rows) => rows.map((r) => (r.id === id ? { ...r, [field]: value } : r)));
+  }
+
+  function moveDebt(id: string, dir: -1 | 1) {
+    setDebts((rows) => {
+      const i = rows.findIndex((r) => r.id === id);
+      const j = i + dir;
+      if (i < 0 || j < 0 || j >= rows.length) return rows;
+      const next = rows.slice();
+      const a = next[i]!;
+      const b = next[j]!;
+      next[i] = b;
+      next[j] = a;
+      return next;
+    });
+    if (strategy !== "custom") setStrategy("custom");
   }
 
   function saveAsPlan() {
@@ -146,7 +168,7 @@ export function CalculatorApp() {
     router.push("/app");
   }
 
-  const alt = result?.vsAvalanche ?? result?.vsSnowball;
+    const alt = strategy === "snowball" ? result?.vsAvalanche : (result?.vsSnowball ?? result?.vsAvalanche);
 
   return (
     <>
@@ -172,6 +194,7 @@ export function CalculatorApp() {
               <table className="plain-table">
                 <thead>
                   <tr>
+                    <th scope="col" className="order-col">Order</th>
                     <th scope="col">Debt name</th>
                     <th scope="col">Balance</th>
                     <th scope="col">APR %</th>
@@ -182,6 +205,30 @@ export function CalculatorApp() {
                 <tbody>
                   {debts.map((d, i) => (
                     <tr key={d.id}>
+                      <td className="order-col">
+                        <div className="reorder">
+                          <button
+                            type="button"
+                            className="linkish reorder-btn"
+                            aria-label={`Move ${d.name || "debt"} up`}
+                            disabled={i === 0}
+                            onClick={() => moveDebt(d.id, -1)}
+                            data-testid={`debt-up-${i}`}
+                          >
+                            Up
+                          </button>
+                          <button
+                            type="button"
+                            className="linkish reorder-btn"
+                            aria-label={`Move ${d.name || "debt"} down`}
+                            disabled={i === debts.length - 1}
+                            onClick={() => moveDebt(d.id, 1)}
+                            data-testid={`debt-down-${i}`}
+                          >
+                            Down
+                          </button>
+                        </div>
+                      </td>
                       <td>
                         <label className="sr-only" htmlFor={`name-${d.id}`}>
                           Debt name
@@ -286,6 +333,16 @@ export function CalculatorApp() {
                   />
                   Avalanche <span className="muted">highest APR first</span>
                 </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="strategy"
+                    checked={strategy === "custom"}
+                    onChange={() => setStrategy("custom")}
+                    data-testid="strategy-custom"
+                  />
+                  Custom <span className="muted">your order, using the arrows</span>
+                </label>
               </fieldset>
             </div>
             {parsed.errors.length ? (
@@ -329,13 +386,19 @@ export function CalculatorApp() {
                     </article>
                     <article className="card solid">
                       <h3>
-                        {strategy === "snowball" ? "Versus avalanche" : "Versus snowball"}
+                        {strategy === "avalanche"
+                          ? "Versus snowball"
+                          : strategy === "custom"
+                            ? "Versus snowball"
+                            : "Versus avalanche"}
                       </h3>
                       {alt && !alt.otherCapped ? (
                         <p>
                           {strategy === "avalanche"
                             ? "Avalanche usually costs less interest."
-                            : "Snowball pays the smallest debt first — a win you can feel."}{" "}
+                            : strategy === "custom"
+                              ? "Your custom order compared with snowball."
+                              : "Snowball pays the smallest debt first — a win you can feel."}{" "}
                           Difference: {formatCents(Math.abs(alt.interestSavedCents ?? 0))} interest,{" "}
                           {Math.abs(alt.monthsSaved ?? 0)} months.
                         </p>
@@ -360,18 +423,21 @@ export function CalculatorApp() {
                     </ol>
                     <BalanceChart
                       title="Total balance over time"
-                      points={result.schedule.map((s) => ({
-                        month: s.month,
-                        label: s.yearMonth,
-                        cents: s.endBalanceCents,
-                      }))}
+                      points={[
+                        { month: 0, label: "Start", cents: result.startTotalCents },
+                        ...result.schedule.map((s) => ({
+                          month: s.month,
+                          label: s.yearMonth,
+                          cents: s.endBalanceCents,
+                        })),
+                      ]}
                     />
                   </div>
 
                   {result.warnings.length ? (
-                    <p className="notice">
-                      Some minimums don&apos;t cover this month&apos;s interest. Extra payments are doing
-                      the heavy lifting on:{" "}
+                    <p className="notice" role="status" data-testid="non-amortizing">
+                      Some minimums don&apos;t cover this month&apos;s interest, so those balances can grow
+                      without extra. Extra payments are doing the heavy lifting on:{" "}
                       {result.warnings.map((w) => w.name).join(", ")}.
                     </p>
                   ) : null}

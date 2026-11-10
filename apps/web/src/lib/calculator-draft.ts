@@ -11,7 +11,7 @@ export type CalculatorDraftDebt = {
 export type CalculatorDraft = {
   debts: CalculatorDraftDebt[];
   extra: string;
-  strategy: "snowball" | "avalanche";
+  strategy: "snowball" | "avalanche" | "custom";
   hintTotal?: string;
   hintMins?: string;
 };

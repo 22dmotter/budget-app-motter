@@ -13,13 +13,17 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
+const siteUrl = "https://22dmotter.github.io/budget-app-motter";
+const siteDescription =
+  "A simple debt payoff calculator and tracker. See your debt-free date, log payments, and watch your progress — right in the browser.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
     default: `${brand.name} — See your path out of debt`,
     template: `%s | ${brand.name}`,
   },
-  description:
-    "A simple debt payoff calculator and tracker. See your debt-free date, log payments, and watch your progress — right in the browser.",
+  description: siteDescription,
   robots: { index: true, follow: true },
   applicationName: brand.name,
   appleWebApp: {
@@ -28,8 +32,21 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
   },
   icons: {
-    icon: withBasePath("/icons/icon-192.png"),
+    icon: [{ url: withBasePath("/favicon.ico") }, { url: withBasePath("/icons/icon-192.png"), sizes: "192x192", type: "image/png" }],
     apple: withBasePath("/icons/apple-touch-icon.png"),
+  },
+  openGraph: {
+    type: "website",
+    siteName: brand.name,
+    title: `${brand.name} — See your path out of debt`,
+    description: siteDescription,
+    url: siteUrl,
+    images: [{ url: withBasePath("/icons/icon-512.png"), width: 512, height: 512, alt: brand.name }],
+  },
+  twitter: {
+    card: "summary",
+    title: `${brand.name} — See your path out of debt`,
+    description: siteDescription,
   },
 };
 
@@ -53,6 +70,7 @@ export default function RootLayout({
         />
         <meta name="theme-color" content="#0F1E3D" />
         <link rel="manifest" href={withBasePath("/manifest.webmanifest")} />
+        <link rel="icon" href={withBasePath("/favicon.ico")} />
         <link rel="apple-touch-icon" href={withBasePath("/icons/apple-touch-icon.png")} />
       </head>
       <body>

@@ -89,7 +89,7 @@ budget-app-motter/
 |------|---------|
 | `/` | Homepage with a 3-field debt-free date quick start |
 | `/about` | Project framing |
-| `/pricing` | Placeholder — **no prices** |
+| `/pricing` | Preview of proposed plans (checkout is not live) |
 | `/login`, `/signup` | Placeholder UI only — **no real auth** |
 | `/calculator` | Debt payoff calculator (snowball / avalanche, schedule, save as My Plan) |
 | `/app` | My Plan — budget, debts, logging, journey/milestones (PWA) |
@@ -180,7 +180,7 @@ It is not installed under `.github/workflows/` in this initial push because the 
 4. **Lead capture** — persist `POST /v1/leads`; optional email provider.
 5. **Hosting** — static web preview is on GitHub Pages; later e.g. Vercel (web) + Fly/Railway/Render (API) + managed Postgres.
 6. **Optional native client** — only if needed later; the website remains the product. Reuse `@motter/core` and `/v1`.
-7. **Content** — replace placeholder copy; keep honest about launch status.
+7. **Accounts & billing** — auth, hosted backup, and Stripe entitlements. Pricing stays a preview until checkout is live.
 
 ## Contributing
 
