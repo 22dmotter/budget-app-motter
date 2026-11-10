@@ -1,8 +1,8 @@
 # Motter Budget App
 
-Monorepo for Daniel Motter’s planned **Christian debt-free budgeting** product: a Next.js website and a shared backend API that a future mobile app can also call.
+Monorepo for **Budget App** — a debt payoff calculator and tracker that runs in the browser. The website *is* the product. A shared API keeps a native client possible later, but there is no separate app to download.
 
-> **Status:** infrastructure / scaffolding only. No real accounts, database, or payments yet. A static marketing preview of the website is on GitHub Pages (API is not hosted). Placeholder copy is marked clearly — no fake prices, launch dates, testimonials, or stats.
+> **Status:** The calculator and My Plan tracker work in the browser (localStorage, JSON backup). Accounts, hosted API, and payments come later. No fake prices, launch dates, or testimonials.
 
 The website UI uses a light fintech theme (navy + crimson accent) with Romans 13:8 / Proverbs 22:7 framing. The personal channel site remains separate: [daniel-motter-site](https://github.com/22dmotter/daniel-motter-site).
 
@@ -54,17 +54,16 @@ Change `name`, `tagline`, `description`, and related fields there. The header lo
 ```mermaid
 flowchart LR
   Web["apps/web\nNext.js website"] --> API["apps/api\nFastify /v1"]
-  Mobile["apps/mobile\n(future Expo)"] --> API
+  Native["optional native client\n(later, not promised)"] --> API
   API --> DB[(Postgres\nplanned)]
   API --> Stripe[Stripe\nplanned]
   Web -.-> Shared["packages/shared\ntypes + zod"]
-  Mobile -.-> Shared
   API -.-> Shared
-  Web --> Client["packages/api-client\ntyped fetch"]
-  Mobile -.-> Client
+  Web --> Core["packages/core\npayoff + budget + journey"]
+  API --> Core
 ```
 
-Both clients talk to the **same versioned API**. The website does **not** talk to a database directly.
+The **web app is the primary client** and talks to `@motter/core` in the browser. The same engine powers `POST /v1/calculate/*`. The website does **not** talk to a database directly.
 
 ## Folder structure
 
@@ -73,10 +72,11 @@ budget-app-motter/
 ├── apps/
 │   ├── web/          # Next.js App Router website
 │   ├── api/          # Fastify TypeScript API (/v1/*)
-│   └── mobile/       # Placeholder note only (no Expo yet)
+│   └── mobile/       # Reserved only — optional future client, not a product surface
 ├── packages/
-│   ├── shared/       # Zod schemas + TS types (User, Budget, Debt, Lead)
-│   └── api-client/   # Typed fetch client for web + future mobile
+│   ├── core/         # Payoff, budget, progress, journey engines (no DOM)
+│   ├── shared/       # Zod schemas + TS types (AppState, Debt, Budget, …)
+│   └── api-client/   # Typed fetch client for a future hosted API
 ├── docs/
 │   └── ARCHITECTURE.md
 ├── .github/workflows/ci.yml
@@ -87,11 +87,13 @@ budget-app-motter/
 
 | Path | Purpose |
 |------|---------|
-| `/` | Placeholder homepage (stewardship / Romans 13:8 / Proverbs 22:7) |
+| `/` | Homepage with a 3-field debt-free date quick start |
 | `/about` | Project framing |
 | `/pricing` | Placeholder — **no prices** |
 | `/login`, `/signup` | Placeholder UI only — **no real auth** |
-| `/dashboard` | Placeholder; client-side health probe (shows “not connected yet” without an API) |
+| `/calculator` | Debt payoff calculator (snowball / avalanche, schedule, save as My Plan) |
+| `/app` | My Plan — budget, debts, logging, journey/milestones (PWA) |
+| `/dashboard` | Redirects to `/app` |
 | `/downloads` | Free budgeting spreadsheets (.xlsx) for Excel / Google Sheets / Numbers |
 | `not-found` | 404 page |
 
@@ -140,6 +142,10 @@ cp apps/web/.env.example apps/web/.env.local
 
 Env is validated with **zod** when the API starts.
 
+## Syncing Daniel’s public ledger
+
+`npm run sync:daniel` reads `/workspace/daniel-motter-site/debt-contributions.js` (read-only) into `apps/web/src/data/daniel-journey.json`. See `docs/MILESTONES.md`.
+
 ## Scripts
 
 | Command | What it does |
@@ -152,6 +158,7 @@ Env is validated with **zod** when the API starts.
 | `npm run lint` | Lint where configured |
 | `npm run build:pages` | Static export of `apps/web` with GitHub Pages base path |
 | `npm run deploy:pages` | Build pages export and push to the `gh-pages` branch |
+| `npm run sync:daniel` | Refresh the build-time snapshot of Daniel’s public ledger |
 
 ```bash
 npm run dev
@@ -172,7 +179,7 @@ It is not installed under `.github/workflows/` in this initial push because the 
 3. **Stripe** — products/prices, Checkout, webhook signature verification on `/v1/payments/webhook`.
 4. **Lead capture** — persist `POST /v1/leads`; optional email provider.
 5. **Hosting** — static web preview is on GitHub Pages; later e.g. Vercel (web) + Fly/Railway/Render (API) + managed Postgres.
-6. **Mobile** — scaffold Expo under `apps/mobile` using `@motter/api-client`.
+6. **Optional native client** — only if needed later; the website remains the product. Reuse `@motter/core` and `/v1`.
 7. **Content** — replace placeholder copy; keep honest about launch status.
 
 ## Contributing

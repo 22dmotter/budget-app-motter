@@ -43,7 +43,7 @@ async function parseJsonSafe(res: Response): Promise<unknown> {
 
 /**
  * Typed fetch client for the Motter Budget API.
- * Intended for the website (apps/web) and a future mobile app (apps/mobile).
+ * Intended for the website (the primary client) and any later client that shares the /v1 API.
  */
 export function createApiClient(options: ApiClientOptions) {
   const fetchImpl = options.fetchImpl ?? fetch;

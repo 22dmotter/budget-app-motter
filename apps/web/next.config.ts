@@ -7,7 +7,7 @@ import type { NextConfig } from "next";
 const pagesBasePath = process.env.PAGES_BASE_PATH?.replace(/\/$/, "") || "";
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@motter/shared", "@motter/api-client"],
+  transpilePackages: ["@motter/shared", "@motter/api-client", "@motter/core"],
   reactStrictMode: true,
   // Static export so the site can ship on GitHub Pages (API stays separate).
   output: "export",

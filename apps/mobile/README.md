@@ -1,12 +1,5 @@
-# apps/mobile (placeholder)
+# apps/mobile
 
-A future Expo (or React Native) mobile client can live here.
+This folder is reserved for an *optional* native client later. The website is the product today — a complete, installable web app. A native app is not promised and is not required to use Budget App.
 
-**Do not scaffold Expo in this commit.** When ready:
-
-1. Create an Expo app under `apps/mobile`.
-2. Depend on `@motter/api-client` and `@motter/shared` (same contracts as the website).
-3. Point `API_URL` / `EXPO_PUBLIC_API_URL` at the shared `@motter/api` service.
-4. Reuse auth tokens and zod schemas from `packages/shared`.
-
-The backend at `apps/api` is intentionally client-agnostic (versioned `/v1` routes + CORS) so web and mobile stay in sync.
+If a native client is ever added, it should reuse `@motter/core` and the shared `/v1` API rather than reimplementing the math.

@@ -1,17 +1,36 @@
-import type { Metadata } from "next";
-import { SiteHeader } from "@/components/SiteHeader";
-import { SiteFooter } from "@/components/SiteFooter";
+import type { Metadata, Viewport } from "next";
 import { ParticleBackground } from "@/components/ParticleBackground";
+import { AppFrame } from "@/components/AppFrame";
+import { RegisterSW } from "@/components/RegisterSW";
 import { brand } from "@/config/brand";
+import { withBasePath } from "@/lib/basePath";
 import "@/styles/globals.css";
+
+export const viewport: Viewport = {
+  themeColor: "#0F1E3D",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   title: {
-    default: `${brand.name} — ${brand.tagline}`,
+    default: `${brand.name} — See your path out of debt`,
     template: `%s | ${brand.name}`,
   },
-  description: brand.description,
-  robots: { index: false, follow: false },
+  description:
+    "A simple debt payoff calculator and tracker. See your debt-free date, log payments, and watch your progress — right in the browser.",
+  robots: { index: true, follow: true },
+  applicationName: brand.name,
+  appleWebApp: {
+    capable: true,
+    title: brand.name,
+    statusBarStyle: "black-translucent",
+  },
+  icons: {
+    icon: withBasePath("/icons/icon-192.png"),
+    apple: withBasePath("/icons/apple-touch-icon.png"),
+  },
 };
 
 export default function RootLayout({
@@ -33,6 +52,8 @@ export default function RootLayout({
           rel="stylesheet"
         />
         <meta name="theme-color" content="#0F1E3D" />
+        <link rel="manifest" href={withBasePath("/manifest.webmanifest")} />
+        <link rel="apple-touch-icon" href={withBasePath("/icons/apple-touch-icon.png")} />
       </head>
       <body>
         <div className="page-shell">
@@ -42,9 +63,8 @@ export default function RootLayout({
             <div className="blob blob-c" />
             <ParticleBackground />
           </div>
-          <SiteHeader />
-          <main>{children}</main>
-          <SiteFooter />
+          <RegisterSW />
+          <AppFrame>{children}</AppFrame>
         </div>
       </body>
     </html>

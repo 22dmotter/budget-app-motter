@@ -9,10 +9,10 @@ export const brand = {
   /** Working product name shown in the UI */
   name: "Budget App",
   /** Short line used in metadata / footer */
-  tagline: "Christian debt-free stewardship (placeholder)",
+  tagline: "See your path out of debt",
   /** Default <title> / Open Graph style description */
   description:
-    "Placeholder website for a planned Christian debt-free budgeting app. Not launched. No accounts or billing yet.",
+    "A debt payoff calculator and tracker that runs in your browser. See your debt-free date, log payments, and watch your progress.",
   /** Optional accent mark after the logo wordmark (empty string to hide) */
   logoMark: ".",
   /** Founder story links (About page — not the product brand) */

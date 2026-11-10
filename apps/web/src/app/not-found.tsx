@@ -9,7 +9,7 @@ export default function NotFound() {
           Page <em>not found</em>
         </h1>
         <p className="lead">
-          That route does not exist in this placeholder site.
+          That page isn&apos;t on this site. Try the calculator or My Plan.
         </p>
         <Link href="/" className="btn">
           Go home

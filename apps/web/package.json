@@ -14,7 +14,8 @@
     "@motter/shared": "*",
     "next": "15.5.29",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "@motter/core": "*"
   },
   "devDependencies": {
     "@types/node": "^22.15.21",

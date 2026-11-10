@@ -1,0 +1,25 @@
+{
+  "name": "Budget App",
+  "short_name": "Budget App",
+  "description": "See your path out of debt. Track balances, log payments, and watch your debt-free date get closer.",
+  "start_url": "./app/",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#0F1E3D",
+  "background_color": "#F7F8FA",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

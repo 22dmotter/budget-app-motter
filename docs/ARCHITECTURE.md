@@ -1,53 +1,45 @@
 # Architecture
 
+The **website is the product**. The calculator, My Plan tracker, budget, and milestones are a complete, app-like experience in the browser (installable as a PWA). A native mobile app is an *optional future client*, not a current promise.
+
 ## Goals
 
-- One **source of truth** GitHub repo for the budgeting product.
-- **Website** and a **future mobile app** share the same backend contracts.
-- Secrets stay in env files / host secrets managers — never committed.
-- Ship scaffolding first; add DB, auth, and Stripe deliberately.
+- One GitHub repo is the source of truth.
+- The **web app is the primary client**.
+- The **API stays shared** (`/v1`) so a native client remains possible later — same contracts, same `@motter/core` math.
+- Secrets stay in env files / host secret managers — never committed.
 
 ## Packages
 
 | Package | Role |
 |---------|------|
-| `@motter/web` | Next.js App Router UI. Calls API via `@motter/api-client` only. |
-| `@motter/api` | Fastify HTTP API. Versioned under `/v1`. Zod-validated env at startup. |
-| `@motter/shared` | Zod schemas + inferred TS types (`User`, `Budget`, `Debt`, `Lead`). |
-| `@motter/api-client` | Small typed `fetch` wrapper. Safe to import from web or Expo later. |
+| `@motter/web` | Next.js App Router. Primary product UI. Talks to `@motter/core` in the browser today; can call `@motter/api-client` later. |
+| `@motter/api` | Fastify HTTP API, versioned under `/v1`. Stateless calculate routes work now; persisted CRUD is stubbed. |
+| `@motter/core` | Pure TypeScript engines: money (integer cents), payoff, budget, progress, journey/milestones, encouragement. Zero DOM/IO. Used by web and API. |
+| `@motter/shared` | Zod schemas + inferred types (`AppState`, debts, budgets, calculate requests). |
+| `@motter/api-client` | Typed `fetch` wrapper for when the hosted API + auth land. |
 
 ## Request flow (today)
 
-1. Browser loads `apps/web`.
-2. Server or client uses `createApiClient({ baseUrl: NEXT_PUBLIC_API_URL })`.
-3. Client hits `apps/api` (`GET /v1/health` works; domain routes return 501).
-4. CORS origins come from `CORS_ORIGINS`.
+1. The browser loads the static site (GitHub Pages).
+2. Calculator and My Plan run entirely in the browser via `@motter/core`.
+3. State is saved through a **storage adapter** (`localStorage` now). Export/import JSON is the backup.
+4. The API’s `POST /v1/calculate/*` routes use the same engine (useful for a future hosted client). Domain CRUD returns 501.
 
 ## Planned flow
 
 ```
-Web / Mobile → API (/v1) → Postgres (users, budgets, debts, leads)
-                         → Stripe (subscriptions + webhooks)
+Web app (primary)  ──┐
+                     ├── API /v1  → Postgres (users, plans, debts, payments)
+Optional native app ─┘            → Auth, Stripe (later)
 ```
 
-## API versioning
+Storage adapter swap: `createLocalPlanStorage()` today, an API adapter later, without rewriting the engines.
 
-All product routes live under `/v1`. Breaking changes should introduce `/v2` rather than silently changing `/v1`.
+## PWA
 
-## Stub policy
+`manifest.webmanifest` + `sw.js` (cache-first for `/_next/static` and icons; network-first for pages, with app-shell fallback). Scope is relative so it works under `/budget-app-motter/` or at `/`.
 
-Unimplemented handlers use HTTP **501** with a JSON body:
+## Next phase
 
-```json
-{
-  "error": "NotImplemented",
-  "message": "…",
-  "statusCode": 501
-}
-```
-
-## Security notes (scaffold)
-
-- `.gitignore` excludes `.env*` (except `.env.example`).
-- Stripe webhook stub must later verify signatures with `STRIPE_WEBHOOK_SECRET`.
-- Do not log secrets. Do not put secrets in `NEXT_PUBLIC_*` except publishable keys.
+Hosted API, Postgres (see `docs/DATA_MODEL.md` and `apps/api/prisma/schema.prisma`), auth, Stripe entitlements that actually gate Plus features, lead capture, and optionally a live fetch of Daniel’s public ledger instead of the build-time snapshot.

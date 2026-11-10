@@ -1,10 +1,18 @@
-import type { Metadata } from "next";
-import { DashboardClient } from "./DashboardClient";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Dashboard",
-};
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
-  return <DashboardClient />;
+  const router = useRouter();
+  useEffect(() => {
+    router.replace("/app");
+  }, [router]);
+  return (
+    <header className="hero">
+      <div className="wrap">
+        <p>Taking you to My Plan…</p>
+      </div>
+    </header>
+  );
 }

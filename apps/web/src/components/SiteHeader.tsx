@@ -3,10 +3,10 @@ import { brand } from "@/config/brand";
 
 const links = [
   { href: "/", label: "Home" },
+  { href: "/calculator", label: "Calculator" },
+  { href: "/app", label: "My Plan" },
+  { href: "/downloads", label: "Free Spreadsheets" },
   { href: "/about", label: "About" },
-  { href: "/downloads", label: "Downloads" },
-  { href: "/pricing", label: "Pricing" },
-  { href: "/dashboard", label: "Dashboard" },
 ];
 
 export function SiteHeader() {
@@ -25,13 +25,10 @@ export function SiteHeader() {
                 <Link href={l.href}>{l.label}</Link>
               </li>
             ))}
-            <li>
-              <Link href="/login">Log in</Link>
-            </li>
           </ul>
         </nav>
-        <Link href="/signup" className="btn sm">
-          Sign up
+        <Link href="/app" className="btn sm">
+          Open my plan
         </Link>
       </div>
     </header>
