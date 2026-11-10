@@ -237,6 +237,10 @@ a.text-link:hover {
   color: var(--accent-link);
 }
 
+.muted {
+  color: var(--muted);
+}
+
 .lead {
   font-size: 1.125rem;
   color: var(--muted);
